@@ -62,7 +62,7 @@ def draw_on_image(image, Quater_nums_list):
 
 def convert_fig_to_bytes(fig):
     buf = io.BytesIO()
-    fig.savefig(buf, format='JPEG')
+    fig.savefig(buf, format='PNG', dpi=300)
     plt.close(fig)  # 리소스 해제
     buf.seek(0)
     return buf.getvalue()
@@ -80,7 +80,11 @@ def load_image_from_session_state(key):
     if 'image_dict' in st.session_state and key in st.session_state['image_dict']:  # 'images' 대신 'image_dict' 사용
         byte_data = st.session_state['image_dict'][key]
         image = Image.open(io.BytesIO(byte_data))
-        return image
+        fig, ax = plt.subplots()
+        ax.imshow(image)
+        ax.axis('off')  # 축 숨기기
+        
+        return fig
     return None
 
 
@@ -119,7 +123,7 @@ for key in fig_dict.keys():
     print(loaded_image)
     if loaded_image is not None:
         st.write(f"{key}")
-        st.image(loaded_image)
+        st.pyplot(loaded_image)
         st.write("")
             
         
