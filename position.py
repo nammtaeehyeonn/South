@@ -121,22 +121,58 @@ with st.expander('기초 설정') :
     # play_players = random.sample(all_players, 15)
     st.write("")
     st.markdown("**경기 정보**")
-    df = pd.DataFrame([[quater, mans, len(play_players)]], columns = ['쿼터 수', '경기 인원 수','South FC Entry'], index = ['수치'])
-    st.dataframe(df, use_container_width=True)
+    information_df = pd.DataFrame([[quater, mans, len(play_players)]], columns = ['쿼터 수', '경기 인원 수','South FC Entry'], index = ['수치'])
+    st.dataframe(information_df, use_container_width=True)
 
+    if 'first_button_pressed' not in st.session_state:
+        st.session_state.first_button_pressed = False
+    if 'change_button_pressed' not in st.session_state:
+        st.session_state.change_button_pressed = False
+    if 'no_change_button_pressed' not in st.session_state:
+        st.session_state.no_change_button_pressed = False
     
-    tmp_button = st.button("쿼터 배분 분석하기")
-    if tmp_button:
+    quater_divider_button = st.button("쿼터 배분 분석하기")
+    
+    if quater_divider_button:
+        st.session_state.first_button_pressed = True  
+        
+    if st.session_state.first_button_pressed:
         if mans > len(play_players):
             st.error("경기 참가 인원이 너무 적습니다.")
         else:
             Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums = Quater_calculator(quater, mans, play_players)
             st.divider()
             st.markdown("**가장 공평한 쿼터 수 분배**")
-            col1, col2, col3 = st.columns(3)
-            col1.metric(f"", f"{Fewer_Quarter_mans}명", f"{Fewer_Quarter_nums}쿼터", delta_color="inverse")
-            col2.metric(f"", f"{More_Quarter_mans}명", f"{More_Quarter_nums}쿼터")
-            col3.button("이대로 가기")
+            
+            col1, col2= st.columns(2)
+            col1.metric(f"-", f"{Fewer_Quarter_mans}명", f"{Fewer_Quarter_nums}쿼터", delta_color="inverse")
+            col2.metric(f"-", f"{More_Quarter_mans}명", f"{More_Quarter_nums}쿼터")
+            
+    if st.session_state.first_button_pressed:  
+        change_quater = st.button("직접 조정하기")
+        no_change_quater = st.button("그대로 가기")
+        
+        if change_quater:
+            st.session_state.change_button_pressed = True 
+            st.session_state.no_change_button_pressed = False 
+            
+        if st.session_state.change_button_pressed == True:
+            chang_quater_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : [0]*len(play_players)}, index=[i+1 for i in range(len(play_players))])
+            chang_quater_df.index.name = '순서'
+        
+        if no_change_quater:
+            st.session_state.change_button_pressed = False 
+            st.session_state.no_change_button_pressed = True 
+        
+        if st.session_state.no_change_button_pressed == True:
+            chang_quater_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : [1]*len(play_players)}, index=[i+1 for i in range(len(play_players))])
+            chang_quater_df.index.name = '순서'
+        
+        try:
+            chang_quater_df_st = st.data_editor(chang_quater_df, use_container_width= True)
+        except:
+            tmp = 1
+            
 
 st.write("")
 with st.expander('포메이션 설정') :
