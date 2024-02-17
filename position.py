@@ -3,6 +3,7 @@ from PIL import Image
 import numpy as np
 import streamlit as st
 import io
+import pytesseract
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
@@ -91,17 +92,24 @@ def load_image_from_session_state(key):
 left_column, chat_column, right_column = st.columns([1, 2, 1])
 formation = '선택','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','5-3-2','5-4-1'
 
-# if 'formation' not in st.session_state:
-#     st.session_state.formation = {"Quater_1":"", "Quater_2":"", "Quater_3":"", "Quater_4":""}
+with st.expander('명단 설정') :
+    entry = st.file_uploader("참가 명단 업로드", type=['png','jpg','jpeg'])
+    print(entry)
     
-Quater_1 = st.selectbox("1쿼터 포메이션 선택", formation)
-st.write()
-Quater_2 = st.selectbox("2쿼터 포메이션 선택", formation)
-st.write()
-Quater_3 = st.selectbox("3쿼터 포메이션 선택", formation)
-st.write()
-Quater_4 = st.selectbox("4쿼터 포메이션 선택", formation)
-st.write()
+    language = ['운동', '영화감상', '음악듣기', '산책하기', '먹기']
+    st.multiselect('당신의 취미를 선택하세요. 복수 선택 가능', language)
+
+
+with st.expander('포메이션 설정') :
+
+    Quater_1 = st.selectbox("1쿼터 포메이션 선택", formation)
+    st.write()
+    Quater_2 = st.selectbox("2쿼터 포메이션 선택", formation)
+    st.write()
+    Quater_3 = st.selectbox("3쿼터 포메이션 선택", formation)
+    st.write()
+    Quater_4 = st.selectbox("4쿼터 포메이션 선택", formation)
+    st.write()
 
 
 fig_dict = {"Quater_1":"", "Quater_2":"", "Quater_3":"", "Quater_4":""}
