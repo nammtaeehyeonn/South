@@ -150,28 +150,39 @@ with st.expander('기초 설정') :
             
     if st.session_state.first_button_pressed:  
         change_quater = st.button("직접 조정하기")
-        no_change_quater = st.button("그대로 가기")
+        no_change_quater = st.button("그대로 가기(랜덤)")
         
+        # 조정
         if change_quater:
             st.session_state.change_button_pressed = True 
             st.session_state.no_change_button_pressed = False 
             
         if st.session_state.change_button_pressed == True:
-            chang_quater_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : [0]*len(play_players)}, index=[i+1 for i in range(len(play_players))])
-            chang_quater_df.index.name = '순서'
+            change_quater_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : [0]*len(play_players)}, index=[i+1 for i in range(len(play_players))])
+            change_quater_df.index.name = '순서'
         
+        # 그대로
         if no_change_quater:
             st.session_state.change_button_pressed = False 
             st.session_state.no_change_button_pressed = True 
         
         if st.session_state.no_change_button_pressed == True:
-            chang_quater_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : [1]*len(play_players)}, index=[i+1 for i in range(len(play_players))])
-            chang_quater_df.index.name = '순서'
+            no_change_quater_list = [Fewer_Quarter_nums]*Fewer_Quarter_mans + [More_Quarter_nums]*More_Quarter_mans
+            random.shuffle(no_change_quater_list)
+            change_quater_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : no_change_quater_list}, index=[i+1 for i in range(len(play_players))])
+            change_quater_df.index.name = '순서'
         
-        try:
-            chang_quater_df_st = st.data_editor(chang_quater_df, use_container_width= True)
-        except:
-            tmp = 1
+        
+        if st.session_state.change_button_pressed:
+            change_quater_df_st = st.data_editor(change_quater_df, use_container_width= True, disabled=["선수명단"])
+            left_quater_value = (quater*mans) - change_quater_df_st['쿼터 수'].sum()
+            if left_quater_value < 0:
+                st.error("쿼터 수 초과")
+            if left_quater_value >= 0:
+                left_quater = st.markdown(f"**남은 쿼터 수 : {left_quater_value}**")
+                
+        if st.session_state.no_change_button_pressed:
+            change_quater_df_st = st.dataframe(change_quater_df, use_container_width= True)
             
 
 st.write("")
