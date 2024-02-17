@@ -3,6 +3,7 @@ from PIL import Image
 import numpy as np
 import streamlit as st
 import io
+import pytesseract
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
@@ -92,8 +93,14 @@ left_column, chat_column, right_column = st.columns([1, 2, 1])
 formation = '선택','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','5-3-2','5-4-1'
 
 with st.expander('명단 설정') :
-    entry = st.file_uploader("참가 명단 업로드", type=['png','jpg','jpeg'])
-    print(entry)
+    entry = st.file_uploader("참가 명단 업로드", type=['png','jpg','jpeg','pdf'])
+    if entry is not None:
+        image = Image.open(entry)
+        # Tesseract를 사용하여 이미지에서 한글 텍스트 추출
+        extracted_text = pytesseract.image_to_string(image, lang='kor')
+
+        # 추출된 텍스트 표시
+        st.write("Extracted Text:", extracted_text)
     
     language = ['운동', '영화감상', '음악듣기', '산책하기', '먹기']
     st.multiselect('당신의 취미를 선택하세요. 복수 선택 가능', language)
