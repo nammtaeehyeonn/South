@@ -5,6 +5,7 @@ import streamlit as st
 import io
 import pandas as pd
 import random
+import math
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
@@ -89,28 +90,28 @@ def load_image_from_session_state(key):
         return fig
     return None
 
-
-left_column, chat_column, right_column = st.columns([1, 2, 1])
-formation = '선택','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','5-3-2','5-4-1'
-
-
-
 def Quater_calculator(quater, mans, play_players):
-    import math
+    
     total_Quater_nums = quater*mans
 
     least_quater = math.floor(total_Quater_nums/len(play_players))
     
     Number_of_Quarters_Remaining = total_Quater_nums - (least_quater*len(play_players))
     
-    st.divider()
-    st.markdown("**가장 공평한 쿼터 수 분배**")
-    col1, col2 = st.columns(2)
-    col1.metric(f"", f"{len(play_players)-Number_of_Quarters_Remaining}명", f"{least_quater}쿼터", delta_color="inverse")
-    col2.metric(f"", f"{Number_of_Quarters_Remaining}명", f"{least_quater+1}쿼터")
+    Fewer_Quarter_mans = len(play_players)-Number_of_Quarters_Remaining
+    Fewer_Quarter_nums = least_quater
     
+    More_Quarter_mans = Number_of_Quarters_Remaining
+    More_Quarter_nums = least_quater+1
     
-    
+    return Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums
+
+left_column, chat_column, right_column = st.columns([1, 2, 1])
+formation = '선택','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','5-3-2','5-4-1'
+
+
+st.title("South FC Formation Maker")    
+st.write("")
 with st.expander('기초 설정') :
     quater = st.slider('오늘의 쿼터 수', 1, 6, (4))
     mans = st.slider('경기 선발 인원 수', 5, 13, (11))
@@ -120,7 +121,7 @@ with st.expander('기초 설정') :
     # play_players = random.sample(all_players, 15)
     st.write("")
     st.markdown("**경기 정보**")
-    df = pd.DataFrame([[quater, mans, len(play_players)]], columns = ['쿼터 수', '경기 인원 수','South Entry'], index = ['수치'])
+    df = pd.DataFrame([[quater, mans, len(play_players)]], columns = ['쿼터 수', '경기 인원 수','South FC Entry'], index = ['수치'])
     st.dataframe(df, use_container_width=True)
 
     
@@ -129,7 +130,13 @@ with st.expander('기초 설정') :
         if mans > len(play_players):
             st.error("경기 참가 인원이 너무 적습니다.")
         else:
-            Quater_calculator(quater, mans, play_players)
+            Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums = Quater_calculator(quater, mans, play_players)
+            st.divider()
+            st.markdown("**가장 공평한 쿼터 수 분배**")
+            col1, col2, col3 = st.columns(3)
+            col1.metric(f"", f"{Fewer_Quarter_mans}명", f"{Fewer_Quarter_nums}쿼터", delta_color="inverse")
+            col2.metric(f"", f"{More_Quarter_mans}명", f"{More_Quarter_nums}쿼터")
+            col3.button("이대로 가기")
 
 st.write("")
 with st.expander('포메이션 설정') :
