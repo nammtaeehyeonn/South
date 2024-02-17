@@ -9,7 +9,8 @@ image = Image.open(image_path)
 width, height = image.size
 
 # 이미지 위에 그래픽 그리기
-def draw_on_image(image, *args):
+def draw_on_image(image, Quater_nums_list):
+    Quater_nums_list = [int(i) for i in Quater_nums_list]
     fig, ax = plt.subplots()
     ax.imshow(image)
     
@@ -17,12 +18,12 @@ def draw_on_image(image, *args):
     horizontal_relative_positions = []
     
     virtical_rp = 0.75
-    for _ in range(len(args)):
+    for _ in range(len(Quater_nums_list)):
         virtical_relative_positions.append(round(virtical_rp,5))
-        virtical_rp -= 0.55/(len(args)-1)
+        virtical_rp -= 0.55/(len(Quater_nums_list)-1)
     # virtical_relative_positions += [0.9]
     
-    for nums in args:
+    for nums in Quater_nums_list:
         horizontal_rp = 0.2
         horizontal_relative_per_positions = []
         for _ in range(nums):
@@ -72,11 +73,16 @@ with left_column:
     
     make_formation = st.button("실행하기")
     if make_formation:
-        print(Quater_1)
-        print(Quater_2)
-        print(Quater_3)
-        print(Quater_4)
+        Quater_list = [Quater_1, Quater_2, Quater_3, Quater_4]
+        for qdx, Quater in enumerate(Quater_list):
+            if Quater != "선택":
+                Quater_nums_list = Quater.split("-")
+                fig = draw_on_image(image,Quater_nums_list)
+                st.write(f"{qdx}쿼터 포메이션")
+                st.pyplot(fig)
+                st.write("")
+            
         
-fig = draw_on_image(image,4,3,3)
+# fig = draw_on_image(image,4,3,3)
 
-st.pyplot(fig)
+# st.pyplot(fig)
