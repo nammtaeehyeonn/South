@@ -3,6 +3,8 @@ from PIL import Image
 import numpy as np
 import streamlit as st
 import io
+import pandas as pd
+import random
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
@@ -100,13 +102,12 @@ def Quater_calculator(quater, mans, play_players):
     least_quater = math.floor(total_Quater_nums/len(play_players))
     
     Number_of_Quarters_Remaining = total_Quater_nums - (least_quater*len(play_players))
-    st.write("가장 공평한 쿼터 수 분배")
-    st.write(f"{len(play_players)-Number_of_Quarters_Remaining}명이 {least_quater}쿼터, {Number_of_Quarters_Remaining}명이 {least_quater+1}쿼터")
-    st.write("")
-    # print(least_quater)
-    # print(Number_of_Quarters_Remaining)
-    # print()
-        
+    
+    st.divider()
+    st.markdown("**가장 공평한 쿼터 수 분배**")
+    col1, col2 = st.columns(2)
+    col1.metric(f"", f"{len(play_players)-Number_of_Quarters_Remaining}명", f"{least_quater}쿼터", delta_color="inverse")
+    col2.metric(f"", f"{Number_of_Quarters_Remaining}명", f"{least_quater+1}쿼터")
     
     
     
@@ -116,17 +117,21 @@ with st.expander('기초 설정') :
     
     all_players = [f"선수{i+1}" for i in range(25)]
     play_players = st.multiselect('경기에 참가하는 인원을 고르세요.', all_players)
+    # play_players = random.sample(all_players, 15)
+    st.write("")
+    st.markdown("**경기 정보**")
+    df = pd.DataFrame([[quater, mans, len(play_players)]], columns = ['쿼터 수', '경기 인원 수','South Entry'], index = ['수치'])
+    st.dataframe(df, use_container_width=True)
+
     
-    # st.subheader(f"오늘은 총 {q}쿼터,  {values} : {values} 경기이고 South는 {len(play_players)}명 출전합니다.")
-    st.markdown(f"오늘은 총 **{quater}쿼터,  {mans} : {mans}** 경기이고 South는 **{len(play_players)}명** 출전합니다.")
-    tmp_button = st.button("분석하기")
+    tmp_button = st.button("쿼터 배분 분석하기")
     if tmp_button:
         if mans > len(play_players):
-            st.write("경기 참가 인원이 너무 적습니다.")
+            st.error("경기 참가 인원이 너무 적습니다.")
         else:
             Quater_calculator(quater, mans, play_players)
 
-
+st.write("")
 with st.expander('포메이션 설정') :
 
     Quater_1 = st.selectbox("1쿼터 포메이션 선택", formation)
@@ -138,7 +143,7 @@ with st.expander('포메이션 설정') :
     Quater_4 = st.selectbox("4쿼터 포메이션 선택", formation)
     st.write()
 
-
+st.write("")
 fig_dict = {"Quater_1":"", "Quater_2":"", "Quater_3":"", "Quater_4":""}
 make_formation = st.button("실행하기")
 if make_formation:
