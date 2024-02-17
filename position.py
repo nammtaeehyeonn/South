@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import numpy as np
 import streamlit as st
+import io
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
@@ -54,33 +55,72 @@ def draw_on_image(image, Quater_nums_list):
     # 축과 레이블 제거
     ax.axis('off')
     
-    print(virtical_relative_positions)
-    print(horizontal_relative_positions)
+    # print(virtical_relative_positions)
+    # print(horizontal_relative_positions)
     
     return fig
 
+def convert_fig_to_bytes(fig):
+    buf = io.BytesIO()
+    fig.savefig(buf, format='JPEG')
+    plt.close(fig)  # 리소스 해제
+    buf.seek(0)
+    return buf.getvalue()
+
+def save_images_to_session_state(fig_dict):
+    if 'image_dict' not in st.session_state:
+        st.session_state['image_dict'] = {}
+    
+    for key, fig in fig_dict.items():
+        if fig:  # fig가 비어있지 않은 경우에만 처리
+            byte_data = convert_fig_to_bytes(fig)
+            st.session_state['image_dict'][key] = byte_data
+        
+def load_image_from_session_state(key):
+    if 'image_dict' in st.session_state and key in st.session_state['image_dict']:  # 'images' 대신 'image_dict' 사용
+        byte_data = st.session_state['image_dict'][key]
+        image = Image.open(io.BytesIO(byte_data))
+        return image
+    return None
+
+
 left_column, chat_column, right_column = st.columns([1, 2, 1])
 formation = '선택','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','5-3-2','5-4-1'
-with left_column:
-    Quater_1 = st.selectbox("1쿼터 포메이션 선택", formation)
-    st.write()
-    Quater_2 = st.selectbox("2쿼터 포메이션 선택", formation)
-    st.write()
-    Quater_3 = st.selectbox("3쿼터 포메이션 선택", formation)
-    st.write()
-    Quater_4 = st.selectbox("4쿼터 포메이션 선택", formation)
-    st.write()
+
+# if 'formation' not in st.session_state:
+#     st.session_state.formation = {"Quater_1":"", "Quater_2":"", "Quater_3":"", "Quater_4":""}
     
-    make_formation = st.button("실행하기")
-    if make_formation:
-        Quater_list = [Quater_1, Quater_2, Quater_3, Quater_4]
-        for qdx, Quater in enumerate(Quater_list):
-            if Quater != "선택":
-                Quater_nums_list = Quater.split("-")
-                fig = draw_on_image(image,Quater_nums_list)
-                st.write(f"{qdx}쿼터 포메이션")
-                st.pyplot(fig)
-                st.write("")
+Quater_1 = st.selectbox("1쿼터 포메이션 선택", formation)
+st.write()
+Quater_2 = st.selectbox("2쿼터 포메이션 선택", formation)
+st.write()
+Quater_3 = st.selectbox("3쿼터 포메이션 선택", formation)
+st.write()
+Quater_4 = st.selectbox("4쿼터 포메이션 선택", formation)
+st.write()
+
+
+fig_dict = {"Quater_1":"", "Quater_2":"", "Quater_3":"", "Quater_4":""}
+make_formation = st.button("실행하기")
+if make_formation:
+    Quater_list = [Quater_1, Quater_2, Quater_3, Quater_4]
+    
+    for qdx, Quater in enumerate(Quater_list):
+        if Quater != "선택":
+            Quater_nums_list = Quater.split("-")
+            fig = draw_on_image(image,Quater_nums_list)
+            fig_dict[f"Quater_{qdx+1}"] = fig
+            
+    save_images_to_session_state(fig_dict)
+    
+for key in fig_dict.keys():
+    print(fig_dict)
+    loaded_image = load_image_from_session_state(key)
+    print(loaded_image)
+    if loaded_image is not None:
+        st.write(f"{key}")
+        st.image(loaded_image)
+        st.write("")
             
         
 # fig = draw_on_image(image,4,3,3)
