@@ -3,7 +3,6 @@ from PIL import Image
 import numpy as np
 import streamlit as st
 import io
-import pytesseract
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
