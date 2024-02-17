@@ -1,17 +1,8 @@
-from PIL import Image
-import PyPDF2
+import math
 
-image1 = Image.open('/mnt/e/South/entry_example.jpg')
-im1 = image1.convert('RGB')
-im1.save('/mnt/e/South/entry_example.pdf')
 
-def extract_text_from_pdf(uploaded_file):
-    reader = PyPDF2.PdfReader(uploaded_file)
-    text = ''
-    for page in reader.pages:
-        text += page.extract_text() + '\n'
-    print(text)
-    return text
+def Quater_calculator(quater, mans, play_players):
+    total_Quater_nums = quater*mans
 
-extract_text_from_pdf(im1)
-
+    print(total_Quater_nums/len(play_players))
+    

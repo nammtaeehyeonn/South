@@ -3,7 +3,6 @@ from PIL import Image
 import numpy as np
 import streamlit as st
 import io
-import pytesseract
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
@@ -92,18 +91,40 @@ def load_image_from_session_state(key):
 left_column, chat_column, right_column = st.columns([1, 2, 1])
 formation = '선택','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','5-3-2','5-4-1'
 
-with st.expander('명단 설정') :
-    entry = st.file_uploader("참가 명단 업로드", type=['png','jpg','jpeg','pdf'])
-    if entry is not None:
-        image = Image.open(entry)
-        # Tesseract를 사용하여 이미지에서 한글 텍스트 추출
-        extracted_text = pytesseract.image_to_string(image, lang='kor')
 
-        # 추출된 텍스트 표시
-        st.write("Extracted Text:", extracted_text)
+
+def Quater_calculator(quater, mans, play_players):
+    import math
+    total_Quater_nums = quater*mans
+
+    least_quater = math.floor(total_Quater_nums/len(play_players))
     
-    language = ['운동', '영화감상', '음악듣기', '산책하기', '먹기']
-    st.multiselect('당신의 취미를 선택하세요. 복수 선택 가능', language)
+    Number_of_Quarters_Remaining = total_Quater_nums - (least_quater*len(play_players))
+    st.write("가장 공평한 쿼터 수 분배")
+    st.write(f"{len(play_players)-Number_of_Quarters_Remaining}명이 {least_quater}쿼터, {Number_of_Quarters_Remaining}명이 {least_quater+1}쿼터")
+    st.write("")
+    # print(least_quater)
+    # print(Number_of_Quarters_Remaining)
+    # print()
+        
+    
+    
+    
+with st.expander('기초 설정') :
+    quater = st.slider('오늘의 쿼터 수', 1, 6, (4))
+    mans = st.slider('경기 선발 인원 수', 5, 13, (11))
+    
+    all_players = [f"선수{i+1}" for i in range(25)]
+    play_players = st.multiselect('경기에 참가하는 인원을 고르세요.', all_players)
+    
+    # st.subheader(f"오늘은 총 {q}쿼터,  {values} : {values} 경기이고 South는 {len(play_players)}명 출전합니다.")
+    st.markdown(f"오늘은 총 **{quater}쿼터,  {mans} : {mans}** 경기이고 South는 **{len(play_players)}명** 출전합니다.")
+    tmp_button = st.button("분석하기")
+    if tmp_button:
+        if mans > len(play_players):
+            st.write("경기 참가 인원이 너무 적습니다.")
+        else:
+            Quater_calculator(quater, mans, play_players)
 
 
 with st.expander('포메이션 설정') :
