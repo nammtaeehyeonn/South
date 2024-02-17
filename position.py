@@ -62,7 +62,7 @@ def draw_on_image(image, Quater_nums_list):
 
 def convert_fig_to_bytes(fig):
     buf = io.BytesIO()
-    fig.savefig(buf, format='PNG', dpi=300)
+    fig.savefig(buf, format='PNG', dpi=300, bbox_inches='tight', pad_inches=0)
     plt.close(fig)  # 리소스 해제
     buf.seek(0)
     return buf.getvalue()
@@ -118,9 +118,7 @@ if make_formation:
     save_images_to_session_state(fig_dict)
     
 for key in fig_dict.keys():
-    print(fig_dict)
     loaded_image = load_image_from_session_state(key)
-    print(loaded_image)
     if loaded_image is not None:
         st.write(f"{key}")
         st.pyplot(loaded_image)
