@@ -13,8 +13,8 @@ image = Image.open(image_path)
 width, height = image.size
 
 # 이미지 위에 그래픽 그리기
-def draw_on_image(image, Quater_nums_list):
-    Quater_nums_list = [int(i) for i in Quater_nums_list]
+def draw_on_image(image, quarter_nums_list):
+    quarter_nums_list = [int(i) for i in quarter_nums_list]
     fig, ax = plt.subplots()
     ax.imshow(image)
     
@@ -22,12 +22,12 @@ def draw_on_image(image, Quater_nums_list):
     horizontal_relative_positions = []
     
     virtical_rp = 0.75
-    for _ in range(len(Quater_nums_list)):
+    for _ in range(len(quarter_nums_list)):
         virtical_relative_positions.append(round(virtical_rp,5))
-        virtical_rp -= 0.55/(len(Quater_nums_list)-1)
+        virtical_rp -= 0.55/(len(quarter_nums_list)-1)
     # virtical_relative_positions += [0.9]
     
-    for nums in Quater_nums_list:
+    for nums in quarter_nums_list:
         horizontal_rp = 0.2
         horizontal_relative_per_positions = []
         for _ in range(nums):
@@ -90,19 +90,19 @@ def load_image_from_session_state(key):
         return fig
     return None
 
-def Quater_calculator(quater, mans, play_players):
+def quarter_calculator(quarter, mans, play_players):
     
-    total_Quater_nums = quater*mans
+    total_quarter_nums = quarter*mans
 
-    least_quater = math.floor(total_Quater_nums/len(play_players))
+    least_quarter = math.floor(total_quarter_nums/len(play_players))
     
-    Number_of_Quarters_Remaining = total_Quater_nums - (least_quater*len(play_players))
+    Number_of_Quarters_Remaining = total_quarter_nums - (least_quarter*len(play_players))
     
     Fewer_Quarter_mans = len(play_players)-Number_of_Quarters_Remaining
-    Fewer_Quarter_nums = least_quater
+    Fewer_Quarter_nums = least_quarter
     
     More_Quarter_mans = Number_of_Quarters_Remaining
-    More_Quarter_nums = least_quater+1
+    More_Quarter_nums = least_quarter+1
     
     return Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums
 
@@ -113,17 +113,21 @@ formation = '선택','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-
 st.title("South FC Formation Maker")    
 st.write("")
 with st.expander('기초 설정') :
-    quater = st.slider('오늘의 쿼터 수', 1, 6, (4))
+    quarter = st.slider('오늘의 쿼터 수', 1, 6, (4))
+    st.write("")
     mans = st.slider('경기 선발 인원 수', 5, 13, (11))
+    st.write("")
+    st.write("")
     
     all_players = [f"선수{i+1}" for i in range(25)]
     play_players = st.multiselect('경기에 참가하는 인원을 고르세요.', all_players)
-    # play_players = random.sample(all_players, 15)
     st.write("")
+    
     st.markdown("**경기 정보**")
-    information_df = pd.DataFrame([[quater, mans, len(play_players)]], columns = ['쿼터 수', '경기 인원 수','South FC Entry'], index = ['수치'])
+    information_df = pd.DataFrame([[quarter, mans, len(play_players)]], columns = ['쿼터 수', '경기 인원 수','South FC Entry'], index = ['수치'])
     st.dataframe(information_df, use_container_width=True)
-
+    st.write("")
+    
     if 'first_button_pressed' not in st.session_state:
         st.session_state.first_button_pressed = False
     if 'change_button_pressed' not in st.session_state:
@@ -131,16 +135,16 @@ with st.expander('기초 설정') :
     if 'no_change_button_pressed' not in st.session_state:
         st.session_state.no_change_button_pressed = False
     
-    quater_divider_button = st.button("쿼터 배분 분석하기")
+    quarter_divider_button = st.button("쿼터 배분 분석하기")
     
-    if quater_divider_button:
+    if quarter_divider_button:
         st.session_state.first_button_pressed = True  
         
     if st.session_state.first_button_pressed:
         if mans > len(play_players):
             st.error("경기 참가 인원이 너무 적습니다.")
         else:
-            Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums = Quater_calculator(quater, mans, play_players)
+            Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums = quarter_calculator(quarter, mans, play_players)
             st.divider()
             st.markdown("**가장 공평한 쿼터 수 분배**")
             
@@ -149,76 +153,75 @@ with st.expander('기초 설정') :
             col2.metric(f"-", f"{More_Quarter_mans}명", f"{More_Quarter_nums}쿼터")
             
     if st.session_state.first_button_pressed:  
-        change_quater = st.button("직접 조정하기")
-        no_change_quater = st.button("그대로 가기(랜덤)")
+        st.write("")
+        change_quarter = st.button("직접 조정하기")
+        no_change_quarter = st.button("그대로 가기(랜덤)")
         
         # 조정
-        if change_quater:
+        if change_quarter:
             st.session_state.change_button_pressed = True 
             st.session_state.no_change_button_pressed = False 
             
         if st.session_state.change_button_pressed == True:
-            change_quater_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : [0]*len(play_players)}, index=[i+1 for i in range(len(play_players))])
-            change_quater_df.index.name = '순서'
+            change_quarter_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : [0]*len(play_players)}, index=[i+1 for i in range(len(play_players))])
+            change_quarter_df.index.name = '순서'
         
         # 그대로
-        if no_change_quater:
+        if no_change_quarter:
             st.session_state.change_button_pressed = False 
             st.session_state.no_change_button_pressed = True 
         
         if st.session_state.no_change_button_pressed == True:
-            no_change_quater_list = [Fewer_Quarter_nums]*Fewer_Quarter_mans + [More_Quarter_nums]*More_Quarter_mans
-            random.shuffle(no_change_quater_list)
-            change_quater_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : no_change_quater_list}, index=[i+1 for i in range(len(play_players))])
-            change_quater_df.index.name = '순서'
+            no_change_quarter_list = [Fewer_Quarter_nums]*Fewer_Quarter_mans + [More_Quarter_nums]*More_Quarter_mans
+            random.shuffle(no_change_quarter_list)
+            change_quarter_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : no_change_quarter_list}, index=[i+1 for i in range(len(play_players))])
+            change_quarter_df.index.name = '순서'
         
         
         if st.session_state.change_button_pressed:
-            change_quater_df_st = st.data_editor(change_quater_df, use_container_width= True, disabled=["선수명단"])
-            left_quater_value = (quater*mans) - change_quater_df_st['쿼터 수'].sum()
-            if left_quater_value < 0:
+            change_quarter_df_st = st.data_editor(change_quarter_df, use_container_width= True, disabled=["선수명단"])
+            left_quarter_value = (quarter*mans) - change_quarter_df_st['쿼터 수'].sum()
+            if left_quarter_value >= 0:
+                left_quarter = st.markdown(f"**남은 쿼터 수 : {left_quarter_value}**")
+            if left_quarter_value < 0:
                 st.error("쿼터 수 초과")
-            if left_quater_value >= 0:
-                left_quater = st.markdown(f"**남은 쿼터 수 : {left_quater_value}**")
                 
         if st.session_state.no_change_button_pressed:
-            change_quater_df_st = st.dataframe(change_quater_df, use_container_width= True)
+            change_quarter_df_st = st.dataframe(change_quarter_df, use_container_width= True)
             
 
 st.write("")
 with st.expander('포메이션 설정') :
+    quarter_list = []
+    for q in range(quarter):
+        select_quarter = st.selectbox(f"{q+1}쿼터 포메이션 선택", formation)
+        quarter_list.append(select_quarter)
+        st.write()
 
-    Quater_1 = st.selectbox("1쿼터 포메이션 선택", formation)
-    st.write()
-    Quater_2 = st.selectbox("2쿼터 포메이션 선택", formation)
-    st.write()
-    Quater_3 = st.selectbox("3쿼터 포메이션 선택", formation)
-    st.write()
-    Quater_4 = st.selectbox("4쿼터 포메이션 선택", formation)
-    st.write()
 
 st.write("")
-fig_dict = {"Quater_1":"", "Quater_2":"", "Quater_3":"", "Quater_4":""}
-make_formation = st.button("실행하기")
-if make_formation:
-    Quater_list = [Quater_1, Quater_2, Quater_3, Quater_4]
-    
-    for qdx, Quater in enumerate(Quater_list):
-        if Quater != "선택":
-            Quater_nums_list = Quater.split("-")
-            fig = draw_on_image(image,Quater_nums_list)
-            fig_dict[f"Quater_{qdx+1}"] = fig
-            
-    save_images_to_session_state(fig_dict)
-    
-for key in fig_dict.keys():
-    loaded_image = load_image_from_session_state(key)
-    if loaded_image is not None:
-        st.write(f"{key}")
-        st.pyplot(loaded_image)
-        st.write("")
-            
-        
-# fig = draw_on_image(image,4,3,3)
+fig_dict = {"Quarter_1":"", "Quarter_2":"", "Quarter_3":"", "Quarter_4":""}
+make_formation = st.button("포지션 배치하기")
 
-# st.pyplot(fig)
+st.write("")
+with st.spinner("포지션 배치 중"):
+    if make_formation:
+        for qdx, quarter in enumerate(quarter_list):
+            if quarter == "선택":
+                st.error(f"{qdx+1}쿼터의 포메이션을 정해주세요.")
+                st.session_state['image_dict'] = {}
+                break
+            else:
+                quarter_nums_list = quarter.split("-")
+                fig = draw_on_image(image,quarter_nums_list)
+                fig_dict[f"Quarter_{qdx+1}"] = fig
+            
+                save_images_to_session_state(fig_dict)
+        
+    for key in fig_dict.keys():
+        loaded_image = load_image_from_session_state(key)
+        if loaded_image is not None:
+            st.subheader(f"{key[-1]}쿼터")
+            st.pyplot(loaded_image)
+            st.write("")
+                
