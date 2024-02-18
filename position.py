@@ -7,6 +7,8 @@ import pandas as pd
 import random
 import math
 import json
+import os
+import matplotlib.font_manager as fm
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
@@ -15,12 +17,51 @@ width, height = image.size
 
 with open('./eng_formation_dict.json', 'r') as f : 
 	eng_formation_dict = json.load(f)
+ 
+with open('./entry.json', 'r') as f : 
+	entry = json.load(f)
+ 
+@st.cache_data
+def fontRegistered():
+    font_dirs = [os.getcwd() + '/customFonts']
+    font_files = fm.findSystemFonts(fontpaths=font_dirs)
 
+    for font_file in font_files:
+        fm.fontManager.addfont(font_file)
+    fm._load_fontmanager(try_read_cache=False)
+    
+def find_position(joined_formation):
+    find_position_dict = dict()
+    for k in [joined_formation]:
+        flattened_list = [item for sublist in eng_formation_dict[k] for item in sublist]
+        print(k, flattened_list)
+        for fl in flattened_list:
+            print(fl)
+            find_position_dict[fl] = {}
+            main_fl_list = []
+            sub_fl_list = []
+            for k,v in entry.items():
+                if (entry[k]['주포지션'] == fl):
+                    print("주포지션 :", k, " * ")
+                    main_fl_list.append(k)
+                if (fl in entry[k]['부포지션']):
+                    print("부포지션 :", k)
+                    sub_fl_list.append(k)
+            find_position_dict[fl]['주포지션'] = main_fl_list
+            find_position_dict[fl]['부포지션'] = sub_fl_list
+                    
+        print()   
+        print(find_position_dict)
+        return find_position_dict
+    
 # 이미지 위에 그래픽 그리기
-def draw_on_image(image, quarter_nums_list, eng_formation_dict):
+def draw_on_image(image, quarter_nums_list, eng_formation_dict,play_entry):
+    fontRegistered()
+    plt.rc('font', family='NanumGothic')
     joined_formation = "-".join(quarter_nums_list)
     eng_joined_formation = eng_formation_dict[joined_formation]
     
+    find_position_dict = find_position(joined_formation)
     
     quarter_nums_list = [int(i) for i in quarter_nums_list]
     fig, ax = plt.subplots()
@@ -60,6 +101,8 @@ def draw_on_image(image, quarter_nums_list, eng_formation_dict):
             circle = plt.Circle((width * horizontal_pos, circle_y), width * 0.05, color="blue", fill=True)
             ax.add_patch(circle)
             ax.text(width * horizontal_pos, circle_y, eng_pos, ha='center', va='center', color='white', fontsize=8)
+            ax.text(width * horizontal_pos, circle_y+30, "\n".join(find_position_dict[eng_pos]['주포지션']), ha='center', va='center', color='white', fontsize=5)
+
             
     keep_circle_y = 0.9 * height        
     keep_circle = plt.Circle((width * 0.5, keep_circle_y), width * 0.05, color='yellow', fill=True)
@@ -163,7 +206,7 @@ with st.expander('기초 설정') :
             if play_entry[key]['주포지션'] == "GK":
                 GK_count += 1
                 GK_list.append(key)
-        
+   
 
         
     st.write("")
@@ -234,12 +277,25 @@ with st.expander('기초 설정') :
                         left_quarter = st.markdown(f"**남은 쿼터 수 : {left_quarter_value}**")
                     if left_quarter_value < 0:
                         st.error(f"쿼터 수 초과 : {change_quarter_df_st['쿼터 수'].sum() - (quarter*mans)}")
+                    for k in play_entry.keys():
+                        play_entry[k]['쿼터 수'] = change_quarter_df_st.loc[change_quarter_df_st['선수명단'] == k, '쿼터 수'].values[0]
+                        print(play_entry)
                         
                 if st.session_state.no_change_button_pressed:
                     left_quarter_value = 0
                     change_quarter_df_st = st.dataframe(change_quarter_df, use_container_width= True, hide_index = True)
-            
-
+                    for k in play_entry.keys():
+                        play_entry[k]['쿼터 수'] = change_quarter_df.loc[change_quarter_df['선수명단'] == k, '쿼터 수'].values[0]
+                        print(play_entry)
+                
+                # print(change_quarter_df['선수명단'].values)
+                # print(change_quarter_df['주포지션'].values)
+                # print(change_quarter_df['부포지션'].values)
+                # print(change_quarter_df['쿼터 수'].values)
+                
+                # for k in play_entry.keys():
+                #     play_entry[k]['쿼터 수'] = change_quarter_df_st.loc[change_quarter_df_st['선수명단'] == k, '쿼터 수'].values[0]
+                    
 st.write("")
 with st.expander('포메이션 설정') :
     if 'recommend_button_pressed' not in st.session_state:
@@ -330,11 +386,9 @@ with st.expander('포메이션 설정') :
     
     quarter_list = []
     for q in range(quarter):
-        
         select_quarter = st.selectbox(f"{q+1}쿼터 포메이션 선택", formation)
         quarter_list.append(select_quarter)
         st.write()
-
 
 st.write("")
 fig_dict = {"Quarter_1":"", "Quarter_2":"", "Quarter_3":"", "Quarter_4":""}
@@ -353,7 +407,7 @@ with st.spinner("포지션 배치 중"):
                 break
             else:
                 quarter_nums_list = quarter.split("-")
-                fig = draw_on_image(image,quarter_nums_list,eng_formation_dict)
+                fig = draw_on_image(image,quarter_nums_list,eng_formation_dict,play_entry)
                 fig_dict[f"Quarter_{qdx+1}"] = fig
             
                 save_images_to_session_state(fig_dict)
