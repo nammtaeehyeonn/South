@@ -108,6 +108,7 @@ def quarter_calculator(quarter, mans, play_players):
 
 left_column, chat_column, right_column = st.columns([1, 2, 1])
 formation = '선택','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','5-3-2','5-4-1'
+left_quarter_value = 100
 
 
 st.title("South FC Formation Maker")    
@@ -184,9 +185,10 @@ with st.expander('기초 설정') :
             if left_quarter_value >= 0:
                 left_quarter = st.markdown(f"**남은 쿼터 수 : {left_quarter_value}**")
             if left_quarter_value < 0:
-                st.error("쿼터 수 초과")
+                st.error(f"쿼터 수 초과 : {change_quarter_df_st['쿼터 수'].sum() - (quarter*mans)}")
                 
         if st.session_state.no_change_button_pressed:
+            left_quarter_value = 0
             change_quarter_df_st = st.dataframe(change_quarter_df, use_container_width= True)
             
 
@@ -201,7 +203,10 @@ with st.expander('포메이션 설정') :
 
 st.write("")
 fig_dict = {"Quarter_1":"", "Quarter_2":"", "Quarter_3":"", "Quarter_4":""}
-make_formation = st.button("포지션 배치하기")
+if left_quarter_value == 0:
+    make_formation = st.button("포지션 배치하기", type="primary")
+if left_quarter_value != 0:
+    make_formation = st.button("포지션 배치하기", type="primary", disabled=True)
 
 st.write("")
 with st.spinner("포지션 배치 중"):
