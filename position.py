@@ -94,7 +94,7 @@ def quarter_calculator(quarter, mans, play_players, GK_count):
     if GK_count == 0:
         GK_Quater_nums = 0
     if GK_count > 0:
-        GK_Quater_nums = round(quarter/GK_count)
+        GK_Quater_nums = round(quarter/GK_count,1)
         
     mans -= GK_count
     except_GK_play_players = len(play_players) - GK_count
@@ -116,12 +116,13 @@ def quarter_calculator(quarter, mans, play_players, GK_count):
 left_column, chat_column, right_column = st.columns([1, 2, 1])
 formation = '선택','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','5-3-2','5-4-1'
 left_quarter_value = 100
-
+global_quater = 0
 
 st.title("South FC Formation Maker")    
 st.write("")
 with st.expander('기초 설정') :
     quarter = st.slider('오늘의 쿼터 수', 1, 6, (4))
+    global_quater = quarter
     st.write("")
     mans = st.slider('경기 선발 인원 수', 5, 13, (11))
     st.write("")
@@ -180,62 +181,148 @@ with st.expander('기초 설정') :
         if mans > len(play_players):
             st.error("경기 참가 인원이 너무 적습니다.")
         else:
-
             Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums, GK_count, GK_Quater_nums = quarter_calculator(quarter, mans, play_players, GK_count)
             st.divider()
             st.markdown("**가장 공평한 쿼터 수 분배**")
             
             col1, col2, col3= st.columns(3)
-            col1.metric(f"-", f"{Fewer_Quarter_mans}명", f"{Fewer_Quarter_nums}쿼터", delta_color="inverse")
-            col2.metric(f"-", f"{More_Quarter_mans}명", f"{More_Quarter_nums}쿼터")
-            col3.metric("키퍼", f"{GK_count}명", f"{GK_Quater_nums}쿼터")
+            col1.metric("필드", f"{Fewer_Quarter_mans}명", f"{Fewer_Quarter_nums}쿼터", delta_color="inverse")
+            col2.metric("필드", f"{More_Quarter_mans}명", f"{More_Quarter_nums}쿼터")
+            col3.metric("키퍼", f"{GK_count}명", f"{GK_Quater_nums}쿼터",  delta_color="off")
             
-    if st.session_state.first_button_pressed:  
-        st.write("")
-        change_quarter = st.button("직접 조정하기")
-        no_change_quarter = st.button("그대로 가기(랜덤)")
-        
-        # 조정
-        if change_quarter:
-            st.session_state.change_button_pressed = True 
-            st.session_state.no_change_button_pressed = False 
-            
-        if st.session_state.change_button_pressed == True:
-            change_quarter_df = pd.DataFrame({'선수명단' : play_entry.keys(), '주포지션' : [play_entry[key]['주포지션'] for key in play_entry.keys()], '부포지션' : [play_entry[key]['부포지션'] for key in play_entry.keys()], '쿼터 수' : [0]*len(play_players)})
-        
-        # 그대로
-        if no_change_quarter:
-            st.session_state.change_button_pressed = False 
-            st.session_state.no_change_button_pressed = True 
-        
-        if st.session_state.no_change_button_pressed == True:
-            except_GK_list = list(play_entry.keys())
-            for gk in GK_list:
-                except_GK_list.remove(gk)
-            no_change_quarter_list = [Fewer_Quarter_nums]*Fewer_Quarter_mans + [More_Quarter_nums]*More_Quarter_mans
-            random.shuffle(no_change_quarter_list)
-            GK_quarter_df = pd.DataFrame({'선수명단' : GK_list, '주포지션' : [play_entry[gk]['주포지션'] for gk in GK_list], '부포지션' : [play_entry[gk]['부포지션'] for gk in GK_list], '쿼터 수' : [GK_Quater_nums]*GK_count})
-            except_GK_quarter_df = pd.DataFrame({'선수명단' : except_GK_list, '주포지션' : [play_entry[field]['주포지션'] for field in except_GK_list], '부포지션' : [play_entry[field]['부포지션'] for field in except_GK_list], '쿼터 수' : no_change_quarter_list})
-            change_quarter_df = pd.concat([GK_quarter_df, except_GK_quarter_df], axis=0)
-        
-        
-        if st.session_state.change_button_pressed:
-            change_quarter_df_st = st.data_editor(change_quarter_df, use_container_width= True, disabled=["선수명단"], hide_index = True)
-            left_quarter_value = (quarter*mans) - change_quarter_df_st['쿼터 수'].sum()
-            if left_quarter_value >= 0:
-                left_quarter = st.markdown(f"**남은 쿼터 수 : {left_quarter_value}**")
-            if left_quarter_value < 0:
-                st.error(f"쿼터 수 초과 : {change_quarter_df_st['쿼터 수'].sum() - (quarter*mans)}")
+            if st.session_state.first_button_pressed:  
+                st.write("")
+                change_quarter = st.button("직접 조정하기")
+                no_change_quarter = st.button("그대로 가기(랜덤)")
                 
-        if st.session_state.no_change_button_pressed:
-            left_quarter_value = 0
-            change_quarter_df_st = st.dataframe(change_quarter_df, use_container_width= True, hide_index = True)
+                # 조정
+                if change_quarter:
+                    st.session_state.change_button_pressed = True 
+                    st.session_state.no_change_button_pressed = False 
+                    
+                if st.session_state.change_button_pressed == True:
+                    change_quarter_df = pd.DataFrame({'선수명단' : play_entry.keys(), '주포지션' : [play_entry[key]['주포지션'] for key in play_entry.keys()], '부포지션' : [play_entry[key]['부포지션'] for key in play_entry.keys()], '쿼터 수' : [0]*len(play_players)})
+                
+                # 그대로
+                if no_change_quarter:
+                    st.session_state.change_button_pressed = False 
+                    st.session_state.no_change_button_pressed = True 
+                
+                if st.session_state.no_change_button_pressed == True:
+                    except_GK_list = list(play_entry.keys())
+                    for gk in GK_list:
+                        except_GK_list.remove(gk)
+                    no_change_quarter_list = [Fewer_Quarter_nums]*Fewer_Quarter_mans + [More_Quarter_nums]*More_Quarter_mans
+                    random.shuffle(no_change_quarter_list)
+                    GK_quarter_df = pd.DataFrame({'선수명단' : GK_list, '주포지션' : [play_entry[gk]['주포지션'] for gk in GK_list], '부포지션' : [play_entry[gk]['부포지션'] for gk in GK_list], '쿼터 수' : [GK_Quater_nums]*GK_count})
+                    except_GK_quarter_df = pd.DataFrame({'선수명단' : except_GK_list, '주포지션' : [play_entry[field]['주포지션'] for field in except_GK_list], '부포지션' : [play_entry[field]['부포지션'] for field in except_GK_list], '쿼터 수' : no_change_quarter_list})
+                    change_quarter_df = pd.concat([GK_quarter_df, except_GK_quarter_df], axis=0)
+                
+                
+                if st.session_state.change_button_pressed:
+                    change_quarter_df_st = st.data_editor(change_quarter_df, use_container_width= True, disabled=["선수명단"], hide_index = True)
+                    left_quarter_value = (quarter*mans) - change_quarter_df_st['쿼터 수'].sum()
+                    if left_quarter_value >= 0:
+                        left_quarter = st.markdown(f"**남은 쿼터 수 : {left_quarter_value}**")
+                    if left_quarter_value < 0:
+                        st.error(f"쿼터 수 초과 : {change_quarter_df_st['쿼터 수'].sum() - (quarter*mans)}")
+                        
+                if st.session_state.no_change_button_pressed:
+                    left_quarter_value = 0
+                    change_quarter_df_st = st.dataframe(change_quarter_df, use_container_width= True, hide_index = True)
             
 
 st.write("")
 with st.expander('포메이션 설정') :
+    if 'recommend_button_pressed' not in st.session_state:
+        st.session_state.recommend_button_pressed = False
+        
+    if left_quarter_value == 0:
+        Recommended_Formation = st.button("포메이션 추천")
+    if left_quarter_value != 0:
+        Recommended_Formation = st.button("포메이션 추천", disabled=True)
+        
+    if Recommended_Formation:
+        st.session_state.recommend_button_pressed = True 
+        
+    if (st.session_state.recommend_button_pressed) & (left_quarter_value == 0):
+        sub_pos_list = []
+        main_pos_list = list(change_quarter_df['주포지션'].values)
+        for sub_p in change_quarter_df['부포지션'].values:
+            sub_pos_list.extend(sub_p)    
+        
+        positions = ["CF","WF","CM","WM","CB","WB","GK"]
+        positions_mans = [0,0,0]
+        total_point = [0,0,0]
+        
+        df_dict = dict()
+        for idx, p in enumerate(positions[:-1][::-1]):
+            df_dict[p] = [main_pos_list.count(p), (sub_pos_list.count(p)), main_pos_list.count(p)+(sub_pos_list.count(p)), math.floor((main_pos_list.count(p)+(sub_pos_list.count(p)))/global_quater)]
+            if p[-1] == 'B':
+                positions_mans[0] += df_dict[p][-1]
+                total_point[0] += df_dict[p][-2]
+            if p[-1] == 'M':
+                positions_mans[1] += df_dict[p][-1]
+                total_point[1] += df_dict[p][-2]
+            if p[-1] == 'F':
+                positions_mans[2] += df_dict[p][-1]
+                total_point[2] += df_dict[p][-2]
+        point_df = pd.DataFrame(df_dict, index = ['주포지션', '부포지션', '총점', '적정 인원'])
+        
+        final_positions_mans = positions_mans.copy()
+        
+        max_nums_positions = positions_mans.index(max(positions_mans))
+        positions_mans[max_nums_positions] = 100
+        
+        min_nums_positions = positions_mans.index(min(positions_mans))
+        positions_mans[min_nums_positions] = -100
+        
+        median_nums_positions = [i for i in range(len(total_point)) if (i != max_nums_positions) & (i != min_nums_positions)][0]
+        
+        count_positions = ["수비", "미드필더", "공격"]
+        count_positions = [count_positions[max_nums_positions], count_positions[median_nums_positions], count_positions[min_nums_positions]]
+        
+            
+        if final_positions_mans[0] < 3:
+            final_positions_mans[0] = 3
+            
+        if final_positions_mans[0] > 4:
+            final_positions_mans[0] = 4    
+            
+        if final_positions_mans[2] >= 4:
+            final_positions_mans[2] = 3
+        
+        if count_positions[0] == "수비":
+            final_positions_mans[0] = 4
+            if count_positions[2] == "공격":
+                final_positions_mans[2] = 1
+            else:
+                final_positions_mans[2] = 2
+            final_positions_mans[1] = 10 - (final_positions_mans[0] + final_positions_mans[2])
+                
+        if count_positions[0] == "미드필더":
+            final_positions_mans[1] = 5
+            if count_positions[2] == "공격":
+                final_positions_mans[2] = 1
+            else:
+                final_positions_mans[2] = 2                
+            final_positions_mans[1] = 10 - (final_positions_mans[1] + final_positions_mans[2])
+            
+        if count_positions[0] == "공격":
+            final_positions_mans[2] = 3
+            if count_positions[2] == "수비":
+                final_positions_mans[0] = 3
+            else:
+                final_positions_mans[0] = 4                
+            final_positions_mans[1] = 10 - (final_positions_mans[2] + final_positions_mans[0])    
+        
+        st.markdown(f"오늘 South FC의 선수들은 **{count_positions[0]}, {count_positions[1]}, {count_positions[2]}** 포지션 순으로 많습니다.")
+        st.subheader("추천 포메이션 : " + "-".join([str(i) for i in final_positions_mans]))
+        st.write("")
+    
     quarter_list = []
     for q in range(quarter):
+        
         select_quarter = st.selectbox(f"{q+1}쿼터 포메이션 선택", formation)
         quarter_list.append(select_quarter)
         st.write()
