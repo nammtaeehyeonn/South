@@ -6,11 +6,15 @@ import io
 import pandas as pd
 import random
 import math
+import json
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
 image = Image.open(image_path)
 width, height = image.size
+
+with open('./eng_formation_dict.json', 'r') as f : 
+	eng_formation_dict = json.load(f)
 
 # 이미지 위에 그래픽 그리기
 def draw_on_image(image, quarter_nums_list):
@@ -25,9 +29,8 @@ def draw_on_image(image, quarter_nums_list):
     for _ in range(len(quarter_nums_list)):
         virtical_relative_positions.append(round(virtical_rp,5))
         virtical_rp -= 0.55/(len(quarter_nums_list)-1)
-    # virtical_relative_positions += [0.9]
     
-    for nums in quarter_nums_list:
+    for ndx, nums in enumerate(quarter_nums_list):
         horizontal_rp = 0.2
         horizontal_relative_per_positions = []
         for _ in range(nums):
@@ -39,12 +42,14 @@ def draw_on_image(image, quarter_nums_list):
         if len(horizontal_relative_per_positions) == 1:
             horizontal_relative_per_positions = [0.5]
         if len(horizontal_relative_per_positions) == 2:
-            horizontal_relative_per_positions = [0.4, 0.6]
+            if (ndx == 2) & (quarter_nums_list == [4,2,2,2]):
+                horizontal_relative_per_positions = [0.2, 0.8]
+            else:
+                horizontal_relative_per_positions = [0.4, 0.6]
         if len(horizontal_relative_per_positions) == 3:
             horizontal_relative_per_positions = [0.3, 0.5, 0.7]
         horizontal_relative_positions.append(horizontal_relative_per_positions)
     
-    # 포지션(동그라미) 그리기 - 예시로 몇 개의 포지션을 임의로 추가
     for virtical_pos, horizontal_pos_list in zip(virtical_relative_positions, horizontal_relative_positions):
         circle_y = virtical_pos * height  # 세로 위치 계산
         for horizontal_pos in horizontal_pos_list:
@@ -57,9 +62,6 @@ def draw_on_image(image, quarter_nums_list):
     
     # 축과 레이블 제거
     ax.axis('off')
-    
-    # print(virtical_relative_positions)
-    # print(horizontal_relative_positions)
     
     return fig
 
@@ -114,7 +116,8 @@ def quarter_calculator(quarter, mans, play_players, GK_count):
     return Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums, GK_count, GK_Quater_nums
 
 left_column, chat_column, right_column = st.columns([1, 2, 1])
-formation = '선택','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','5-3-2','5-4-1'
+# formation = '선택','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-4-2-1','5-3-2','5-4-1'
+formation = list(eng_formation_dict.keys())
 left_quarter_value = 100
 global_quater = 0
 
@@ -154,7 +157,6 @@ with st.expander('기초 설정') :
             if play_entry[key]['주포지션'] == "GK":
                 GK_count += 1
                 GK_list.append(key)
-                print(GK_list)
         
 
         
