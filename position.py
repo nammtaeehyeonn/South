@@ -90,21 +90,28 @@ def load_image_from_session_state(key):
         return fig
     return None
 
-def quarter_calculator(quarter, mans, play_players):
+def quarter_calculator(quarter, mans, play_players, GK_count):
+    if GK_count == 0:
+        GK_Quater_nums = 0
+    if GK_count > 0:
+        GK_Quater_nums = round(quarter/GK_count)
+        
+    mans -= GK_count
+    except_GK_play_players = len(play_players) - GK_count
     
     total_quarter_nums = quarter*mans
 
-    least_quarter = math.floor(total_quarter_nums/len(play_players))
+    least_quarter = math.floor(total_quarter_nums/except_GK_play_players)
     
-    Number_of_Quarters_Remaining = total_quarter_nums - (least_quarter*len(play_players))
+    Number_of_Quarters_Remaining = total_quarter_nums - (least_quarter*except_GK_play_players)
     
-    Fewer_Quarter_mans = len(play_players)-Number_of_Quarters_Remaining
+    Fewer_Quarter_mans = except_GK_play_players-Number_of_Quarters_Remaining
     Fewer_Quarter_nums = least_quarter
     
     More_Quarter_mans = Number_of_Quarters_Remaining
     More_Quarter_nums = least_quarter+1
     
-    return Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums
+    return Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums, GK_count, GK_Quater_nums
 
 left_column, chat_column, right_column = st.columns([1, 2, 1])
 formation = '선택','4-4-2','4-3-3','4-2-3-1','4-3-1-2','4-2-2-2','4-3-2-1','4-1-4-1','4-1-2-3','4-5-1','4-4-1-1','4-6-0','3-5-2','3-4-3','3-3-3-1','3-4-1-2','3-6-1','3-4-2-1','5-3-2','5-4-1'
@@ -121,7 +128,35 @@ with st.expander('기초 설정') :
     st.write("")
     
     all_players = [f"선수{i+1}" for i in range(25)]
+    ##### 포지션 삽입 구간 #####
+    all_entry = dict()
+    random.seed(2022)
+    for p in all_players:
+        positions = ["CF","WF","CM","WM","CB","WB","GK"]
+        main_position = random.choice(positions)
+        positions.remove(main_position)
+        sub_position = random.sample(positions, random.randint(1, 5))
+        if main_position == "GK":
+            sub_position = []
+            
+        if "GK" in sub_position:
+            sub_position.remove("GK")
+        all_entry[p] = {"주포지션":main_position,"부포지션":sub_position}
+    ############################
     play_players = st.multiselect('경기에 참가하는 인원을 고르세요.', all_players)
+    play_entry = dict()
+    GK_count = 0
+    GK_list = []
+    for key,value, in all_entry.items():
+        if key in play_players:
+            play_entry[key] = value
+            if play_entry[key]['주포지션'] == "GK":
+                GK_count += 1
+                GK_list.append(key)
+                print(GK_list)
+        
+
+        
     st.write("")
     
     st.markdown("**경기 정보**")
@@ -145,13 +180,15 @@ with st.expander('기초 설정') :
         if mans > len(play_players):
             st.error("경기 참가 인원이 너무 적습니다.")
         else:
-            Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums = quarter_calculator(quarter, mans, play_players)
+
+            Fewer_Quarter_mans, Fewer_Quarter_nums, More_Quarter_mans, More_Quarter_nums, GK_count, GK_Quater_nums = quarter_calculator(quarter, mans, play_players, GK_count)
             st.divider()
             st.markdown("**가장 공평한 쿼터 수 분배**")
             
-            col1, col2= st.columns(2)
+            col1, col2, col3= st.columns(3)
             col1.metric(f"-", f"{Fewer_Quarter_mans}명", f"{Fewer_Quarter_nums}쿼터", delta_color="inverse")
             col2.metric(f"-", f"{More_Quarter_mans}명", f"{More_Quarter_nums}쿼터")
+            col3.metric("키퍼", f"{GK_count}명", f"{GK_Quater_nums}쿼터")
             
     if st.session_state.first_button_pressed:  
         st.write("")
@@ -164,8 +201,7 @@ with st.expander('기초 설정') :
             st.session_state.no_change_button_pressed = False 
             
         if st.session_state.change_button_pressed == True:
-            change_quarter_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : [0]*len(play_players)}, index=[i+1 for i in range(len(play_players))])
-            change_quarter_df.index.name = '순서'
+            change_quarter_df = pd.DataFrame({'선수명단' : play_entry.keys(), '주포지션' : [play_entry[key]['주포지션'] for key in play_entry.keys()], '부포지션' : [play_entry[key]['부포지션'] for key in play_entry.keys()], '쿼터 수' : [0]*len(play_players)})
         
         # 그대로
         if no_change_quarter:
@@ -173,14 +209,18 @@ with st.expander('기초 설정') :
             st.session_state.no_change_button_pressed = True 
         
         if st.session_state.no_change_button_pressed == True:
+            except_GK_list = list(play_entry.keys())
+            for gk in GK_list:
+                except_GK_list.remove(gk)
             no_change_quarter_list = [Fewer_Quarter_nums]*Fewer_Quarter_mans + [More_Quarter_nums]*More_Quarter_mans
             random.shuffle(no_change_quarter_list)
-            change_quarter_df = pd.DataFrame({'선수명단' : play_players, '쿼터 수' : no_change_quarter_list}, index=[i+1 for i in range(len(play_players))])
-            change_quarter_df.index.name = '순서'
+            GK_quarter_df = pd.DataFrame({'선수명단' : GK_list, '주포지션' : [play_entry[gk]['주포지션'] for gk in GK_list], '부포지션' : [play_entry[gk]['부포지션'] for gk in GK_list], '쿼터 수' : [GK_Quater_nums]*GK_count})
+            except_GK_quarter_df = pd.DataFrame({'선수명단' : except_GK_list, '주포지션' : [play_entry[field]['주포지션'] for field in except_GK_list], '부포지션' : [play_entry[field]['부포지션'] for field in except_GK_list], '쿼터 수' : no_change_quarter_list})
+            change_quarter_df = pd.concat([GK_quarter_df, except_GK_quarter_df], axis=0)
         
         
         if st.session_state.change_button_pressed:
-            change_quarter_df_st = st.data_editor(change_quarter_df, use_container_width= True, disabled=["선수명단"])
+            change_quarter_df_st = st.data_editor(change_quarter_df, use_container_width= True, disabled=["선수명단"], hide_index = True)
             left_quarter_value = (quarter*mans) - change_quarter_df_st['쿼터 수'].sum()
             if left_quarter_value >= 0:
                 left_quarter = st.markdown(f"**남은 쿼터 수 : {left_quarter_value}**")
@@ -189,7 +229,7 @@ with st.expander('기초 설정') :
                 
         if st.session_state.no_change_button_pressed:
             left_quarter_value = 0
-            change_quarter_df_st = st.dataframe(change_quarter_df, use_container_width= True)
+            change_quarter_df_st = st.dataframe(change_quarter_df, use_container_width= True, hide_index = True)
             
 
 st.write("")
