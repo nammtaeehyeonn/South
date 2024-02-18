@@ -306,7 +306,7 @@ with st.expander('포메이션 설정') :
                 final_positions_mans[2] = 1
             else:
                 final_positions_mans[2] = 2                
-            final_positions_mans[1] = 10 - (final_positions_mans[1] + final_positions_mans[2])
+            final_positions_mans[0] = 10 - (final_positions_mans[1] + final_positions_mans[2])
             
         if count_positions[0] == "공격":
             final_positions_mans[2] = 3
