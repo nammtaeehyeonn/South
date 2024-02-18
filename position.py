@@ -57,13 +57,14 @@ def draw_on_image(image, quarter_nums_list, eng_formation_dict):
     for eng_joined_formation_list, virtical_pos, horizontal_pos_list in zip(eng_joined_formation, virtical_relative_positions, horizontal_relative_positions):
         circle_y = virtical_pos * height  # 세로 위치 계산
         for eng_pos, horizontal_pos in zip(eng_joined_formation_list, horizontal_pos_list):
-            circle = plt.Circle((width * horizontal_pos, circle_y), width * 0.05, color="red", fill="asdasd")
+            circle = plt.Circle((width * horizontal_pos, circle_y), width * 0.05, color="blue", fill=True)
             ax.add_patch(circle)
             ax.text(width * horizontal_pos, circle_y, eng_pos, ha='center', va='center')
             
     keep_circle_y = 0.9 * height        
-    keep_circle = plt.Circle((width * 0.5, keep_circle_y), width * 0.05, color='yellow', fill=False)
+    keep_circle = plt.Circle((width * 0.5, keep_circle_y), width * 0.05, color='yellow', fill=True)
     ax.add_patch(keep_circle)           
+    ax.text(width * 0.5, keep_circle_y, "GK", ha='center', va='center')
     
     # 축과 레이블 제거
     ax.axis('off')
