@@ -17,7 +17,11 @@ with open('./eng_formation_dict.json', 'r') as f :
 	eng_formation_dict = json.load(f)
 
 # 이미지 위에 그래픽 그리기
-def draw_on_image(image, quarter_nums_list):
+def draw_on_image(image, quarter_nums_list, eng_formation_dict):
+    joined_formation = "-".join(quarter_nums_list)
+    eng_joined_formation = eng_formation_dict[joined_formation]
+    
+    
     quarter_nums_list = [int(i) for i in quarter_nums_list]
     fig, ax = plt.subplots()
     ax.imshow(image)
@@ -50,11 +54,12 @@ def draw_on_image(image, quarter_nums_list):
             horizontal_relative_per_positions = [0.3, 0.5, 0.7]
         horizontal_relative_positions.append(horizontal_relative_per_positions)
     
-    for virtical_pos, horizontal_pos_list in zip(virtical_relative_positions, horizontal_relative_positions):
+    for eng_joined_formation_list, virtical_pos, horizontal_pos_list in zip(eng_joined_formation, virtical_relative_positions, horizontal_relative_positions):
         circle_y = virtical_pos * height  # 세로 위치 계산
-        for horizontal_pos in horizontal_pos_list:
-            circle = plt.Circle((width * horizontal_pos, circle_y), width * 0.05, color="red", fill=False)
+        for eng_pos, horizontal_pos in zip(eng_joined_formation_list, horizontal_pos_list):
+            circle = plt.Circle((width * horizontal_pos, circle_y), width * 0.05, color="red", fill="asdasd")
             ax.add_patch(circle)
+            ax.text(width * horizontal_pos, circle_y, eng_pos, ha='center', va='center')
             
     keep_circle_y = 0.9 * height        
     keep_circle = plt.Circle((width * 0.5, keep_circle_y), width * 0.05, color='yellow', fill=False)
@@ -347,7 +352,7 @@ with st.spinner("포지션 배치 중"):
                 break
             else:
                 quarter_nums_list = quarter.split("-")
-                fig = draw_on_image(image,quarter_nums_list)
+                fig = draw_on_image(image,quarter_nums_list,eng_formation_dict)
                 fig_dict[f"Quarter_{qdx+1}"] = fig
             
                 save_images_to_session_state(fig_dict)
