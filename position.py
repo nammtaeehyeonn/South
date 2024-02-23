@@ -11,7 +11,9 @@ import os
 import matplotlib.font_manager as fm
 import time
 
-random.seed(2022)
+first_seed = random.sample(range(1,1000), 1)[0]
+second_seed = random.sample(range(1001,2000), 1)[0]
+random.seed(first_seed)
 
 # 이미지 파일 로드
 image_path = 'playground.png'  # 이미지 파일 경로 설정
@@ -68,24 +70,42 @@ def adjust_squad_lengths(quater_squad, play_entry):
     all_list = []
     for qs in quater_squad:
         all_list.extend(qs)
-        
     for al in set(all_list):
         play_entry[al]['참가 쿼터'] = []
         for qdx, qs in enumerate(quater_squad):
             if al in qs:
                 play_entry[al]['참가 쿼터'].append(qdx+1)
-    print("#"*50)
-    print(quater_squad)            
-    print(play_entry)   
-    print("#"*50)   
+    # print("@"*110)
+    # print(quater_squad)
+    # print("@"*110)
+    # print("#"*50)
+    # print(quater_squad)            
+    # print(play_entry)   
+    # print("#"*50)   
+    # `
+    # # 키퍼 쿼터 수 조정해라 쿼터 수 동일하게 나누고 같은 쿼터에 안들어가게
+    # `
     return quater_squad, play_entry
 
 def find_position(joined_formation, global_quater, play_entry):
-    random.seed(2021)
+    random.seed(second_seed)
     for k,v in play_entry.items():
+        second_gk = False
+        print(v)
         run_quaters = random.sample(range(1,global_quater+1), int(play_entry[k]['쿼터 수']))
         run_quaters.sort()
+        
+        if v['주포지션'] == 'GK':
+            first_gk_run_quaters = run_quaters
+            gk_full_quarter = [q for q in range(1,global_quater+1)]
+            for f in first_gk_run_quaters:
+                gk_full_quarter.remove(f)
+            second_gk_run_quaters = gk_full_quarter
+            second_gk = True
+        
         play_entry[k]['참가 쿼터'] = run_quaters
+        if second_gk:
+            play_entry[k]['참가 쿼터'] = second_gk_run_quaters
         
     Quater_1_squad = [k for k,v in play_entry.items() if 1 in play_entry[k]['참가 쿼터']]
     Quater_2_squad = [k for k,v in play_entry.items() if 2 in play_entry[k]['참가 쿼터']]
@@ -122,7 +142,7 @@ def find_position(joined_formation, global_quater, play_entry):
             find_position_dict[fl]['부포지션'] = sub_fl_list
                     
         #print()   
-        #print(find_position_dict)
+        print(find_position_dict)
     return find_position_dict, play_entry
     
 # 이미지 위에 그래픽 그리기
@@ -189,7 +209,10 @@ def draw_on_image(image, qdx, quarter_nums_list, eng_formation_dict, global_quat
     keep_circle = plt.Circle((width * 0.5, keep_circle_y), width * 0.05, color='yellow', fill=True)
     ax.add_patch(keep_circle)           
     ax.text(width * 0.5, keep_circle_y, "GK", ha='center', va='center', color='black', fontsize=8)
-    ax.text(width * 0.5, keep_circle_y+30, main_pos_gk, ha='center', va='center', color='black', fontsize=5)
+    try:
+        ax.text(width * 0.5, keep_circle_y+30, main_pos_gk, ha='center', va='center', color='black', fontsize=5)
+    except:
+        ax.text(width * 0.5, keep_circle_y+30, "쿼터 내 누군가", ha='center', va='center', color='black', fontsize=5)
     
     # 축과 레이블 제거
     ax.axis('off')
