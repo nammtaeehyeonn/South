@@ -123,7 +123,7 @@ def find_position(joined_formation, global_quater, play_entry):
                     
         #print()   
         #print(find_position_dict)
-        return find_position_dict, play_entry
+    return find_position_dict, play_entry
     
 # 이미지 위에 그래픽 그리기
 def draw_on_image(image, qdx, quarter_nums_list, eng_formation_dict, global_quater, play_entry):
@@ -134,7 +134,6 @@ def draw_on_image(image, qdx, quarter_nums_list, eng_formation_dict, global_quat
     eng_joined_formation = eng_formation_dict[joined_formation]
     
     find_position_dict, quater_play_entry = find_position(joined_formation, global_quater, play_entry)
-    
     quarter_nums_list = [int(i) for i in quarter_nums_list]
     fig, ax = plt.subplots()
     ax.imshow(image)
@@ -182,11 +181,15 @@ def draw_on_image(image, qdx, quarter_nums_list, eng_formation_dict, global_quat
             # if qdx in find_position_dict[eng_pos]['참가 쿼터']:
             ax.text(width * horizontal_pos, circle_y+30, main_pos_mans, ha='center', va='center', color='white', fontsize=5)
 
-            
+    for k, v in quater_play_entry.items():
+        if (v["주포지션"] == 'GK') & (qdx in v["참가 쿼터"]):
+            main_pos_gk = k
+            print(main_pos_gk)
     keep_circle_y = 0.9 * height        
     keep_circle = plt.Circle((width * 0.5, keep_circle_y), width * 0.05, color='yellow', fill=True)
     ax.add_patch(keep_circle)           
     ax.text(width * 0.5, keep_circle_y, "GK", ha='center', va='center', color='black', fontsize=8)
+    ax.text(width * 0.5, keep_circle_y+30, main_pos_gk, ha='center', va='center', color='black', fontsize=5)
     
     # 축과 레이블 제거
     ax.axis('off')
@@ -259,23 +262,68 @@ with st.expander('기초 설정') :
     st.write("")
     st.write("")
     
-    all_players = [f"선수{i+1}" for i in range(25)]
-    ##### 포지션 삽입 구간 #####
     all_entry = dict()
-    
-    for p in all_players:
-        positions = ["CF","WF","CM","WM","CB","WB","GK"]
-        main_position = random.choice(positions)
-        positions.remove(main_position)
-        sub_position = random.sample(positions, random.randint(1, 5))
-        if main_position == "GK":
-            sub_position = []
-            
-        if "GK" in sub_position:
-            sub_position.remove("GK")
-        all_entry[p] = {"주포지션":main_position,"부포지션":sub_position}
-    ############################
+
+    all_players = ["김동선" ,"김선광" ,"김성재" ,"김영목" ,"김은민" ,"김철영" ,"남태현" ,"민병인" ,"박창후" ,"서윤찬" ,"서종민" ,"소지호" ,"이병훈" ,"이산호" ,"이재성" ,"이종현" ,"정지원" ,"조성민" ,"조영수" ,"차종수" ,"최민규" ,"최형근" ,"최형주" ,"구형준" ,"홍태호", "용병1", "용병2", "용병3", "용병4", "용병5" ]
+    all_main_position = ["WB", "CF", "CB", "CM", "CM", "WB", "CM", "GK", "WF", "WF", "CB", "WF", "CB", "WF", "CF", "WF", "WF", "WB", "CM", "CF", "CB", "CM", "WB", "CF", "CM", "", "", "", "", ""]
+    all_sub_position = [["GK"], ["CM", "WB"], ["WB"], ["CB"], ["WB"], ["CB", "CF"], ["CB", "WB"], [], ["CM","WM","WB"], ["CM","CF"], ["WB", "WF"], ["CM", "WB"], ["CM", "WB"], ["WB", "WM"], ["WF", "CM", "WM"], ["CM", "WM", "CF"], ["CF", "WB"], ["CB"], ["WB"], ["WB", "GK"], ["CM"], ["WF", "WB", "CF"], ["CM"], ["WF", "WB"], ["WF", "CF"], [], [], [], [], []]
+
+    for i, j, k in zip(all_players, all_main_position, all_sub_position):
+        all_entry[i] = {"주포지션":j,"부포지션":k}
+        
     play_players = st.multiselect('경기에 참가하는 인원을 고르세요.', all_players)
+    import re
+    pattern = r"용병\d+"
+    matches = []
+    for name in play_players:
+        if re.match(pattern, name):
+            matches.append(name)
+    left_column_mercenary, chat_column_mercenary, right_column_mercenary = st.columns([1, 0.5, 2])
+    if 'update_mercenary' not in st.session_state:
+        st.session_state.update_mercenary = False
+    if matches:
+        mercenary_key = dict()
+        mercenary_list = [dict()]*len(matches)
+        for mdx, m in enumerate(matches):
+            pos_list = ['CF', 'WF', 'CM', 'WM', 'CB', 'WB', 'GK']
+            with left_column_mercenary:
+                mercenary_name = st.text_input(f"{m} 이름", key=f"a{mdx}")       
+            with chat_column_mercenary:
+                mercenary_main_pos = st.selectbox("주포지션", ["-"] + pos_list, key=f"b{mdx}")       
+            with right_column_mercenary:
+                mercenary_sub_pos = st.multiselect("부포지션", pos_list, key=f"c{mdx}", placeholder="복수선택 가능")       
+            mercenary_list[mdx] = {mercenary_name:{"주포지션":mercenary_main_pos, "부포지션":mercenary_sub_pos}}
+            mercenary_key[m] = mercenary_name
+        st.write("⏬⏬⏬정보 적용을 하지않으면 잘못된 스쿼드로 포지션을 구성하게 될 수 있습니다.")   
+        
+            
+        if st.button("용병 정보 적용하기"):
+            st.session_state.update_mercenary = True
+        if st.session_state.update_mercenary:
+            update_flag = True
+            for mercenary_info in mercenary_list:
+                for k, v in mercenary_info.items():
+                    if (k == '') | (v['주포지션'] == '-'):
+                        st.error("이름/주포지션에 빈 값이 존재합니다.")
+                        update_flag = False
+            if update_flag:
+                for mercenary_info in mercenary_list:
+                    all_entry.update(mercenary_info)
+                tmp_names = "/".join(play_players)
+                for k, v in mercenary_key.items():
+                    tmp_names = tmp_names.replace(k,v)
+                play_players = tmp_names.split("/")
+                for m in matches:
+                    # for pdx, pp in enumerate(play_players):
+                    #     if m == pp:
+                    #         play_players[pdx] = m
+                    del all_entry[m]
+                
+                
+                print("적용!!!")
+                print(play_players)
+                print(all_entry)
+    
     play_entry = dict()
     GK_count = 0
     GK_list = []
@@ -331,7 +379,8 @@ with st.expander('기초 설정') :
                     st.session_state.no_change_button_pressed = False 
                     
                 if st.session_state.change_button_pressed == True:
-                    change_quarter_df = pd.DataFrame({'선수명단' : play_entry.keys(), '주포지션' : [play_entry[key]['주포지션'] for key in play_entry.keys()], '부포지션' : [play_entry[key]['부포지션'] for key in play_entry.keys()], '쿼터 수' : [0]*len(play_players)})
+                    print()
+                    change_quarter_df = pd.DataFrame({'선수명단' : play_entry.keys(), '주포지션' : [play_entry[key]['주포지션'] for key in play_entry.keys()], '부포지션' : [" ".join(play_entry[key]['부포지션']) for key in play_entry.keys()], '쿼터 수' : [0]*len(play_players)})
                 
                 # 그대로
                 if no_change_quarter:
@@ -344,8 +393,8 @@ with st.expander('기초 설정') :
                         except_GK_list.remove(gk)
                     no_change_quarter_list = [Fewer_Quarter_nums]*Fewer_Quarter_mans + [More_Quarter_nums]*More_Quarter_mans
                     random.shuffle(no_change_quarter_list)
-                    GK_quarter_df = pd.DataFrame({'선수명단' : GK_list, '주포지션' : [play_entry[gk]['주포지션'] for gk in GK_list], '부포지션' : [play_entry[gk]['부포지션'] for gk in GK_list], '쿼터 수' : [GK_Quater_nums]*GK_count})
-                    except_GK_quarter_df = pd.DataFrame({'선수명단' : except_GK_list, '주포지션' : [play_entry[field]['주포지션'] for field in except_GK_list], '부포지션' : [play_entry[field]['부포지션'] for field in except_GK_list], '쿼터 수' : no_change_quarter_list})
+                    GK_quarter_df = pd.DataFrame({'선수명단' : GK_list, '주포지션' : [play_entry[gk]['주포지션'] for gk in GK_list], '부포지션' : [" ".join(play_entry[gk]['부포지션']) for gk in GK_list], '쿼터 수' : [GK_Quater_nums]*GK_count})
+                    except_GK_quarter_df = pd.DataFrame({'선수명단' : except_GK_list, '주포지션' : [play_entry[field]['주포지션'] for field in except_GK_list], '부포지션' : [" ".join(play_entry[field]['부포지션']) for field in except_GK_list], '쿼터 수' : no_change_quarter_list})
                     change_quarter_df = pd.concat([GK_quarter_df, except_GK_quarter_df], axis=0)
                 
                 
@@ -358,15 +407,19 @@ with st.expander('기초 설정') :
                         st.error(f"쿼터 수 초과 : {change_quarter_df_st['쿼터 수'].sum() - (quarter*mans)}")
                     for k in play_entry.keys():
                         play_entry[k]['쿼터 수'] = change_quarter_df_st.loc[change_quarter_df_st['선수명단'] == k, '쿼터 수'].values[0]
+                        play_entry[k]['주포지션'] = change_quarter_df_st.loc[change_quarter_df_st['선수명단'] == k, '주포지션'].values[0]
+                        play_entry[k]['부포지션'] = change_quarter_df_st.loc[change_quarter_df_st['선수명단'] == k, '부포지션'].values[0]
                         #print(play_entry)
                         
                 if st.session_state.no_change_button_pressed:
                     left_quarter_value = 0
-                    change_quarter_df_st = st.dataframe(change_quarter_df, use_container_width= True, hide_index = True)
+                    change_quarter_df_st = st.data_editor(change_quarter_df, use_container_width= True, hide_index = True, disabled=["선수명단", "쿼터 수"])
                     for k in play_entry.keys():
-                        play_entry[k]['쿼터 수'] = change_quarter_df.loc[change_quarter_df['선수명단'] == k, '쿼터 수'].values[0]
+                        play_entry[k]['쿼터 수'] = change_quarter_df_st.loc[change_quarter_df_st['선수명단'] == k, '쿼터 수'].values[0]
+                        play_entry[k]['주포지션'] = change_quarter_df_st.loc[change_quarter_df_st['선수명단'] == k, '주포지션'].values[0]
+                        play_entry[k]['부포지션'] = change_quarter_df_st.loc[change_quarter_df_st['선수명단'] == k, '부포지션'].values[0]
+                    
                         #print(play_entry)
-                
                 # #print(change_quarter_df['선수명단'].values)
                 # #print(change_quarter_df['주포지션'].values)
                 # #print(change_quarter_df['부포지션'].values)
