@@ -10,9 +10,12 @@ import json
 import os
 import matplotlib.font_manager as fm
 import time
+import datetime
 
-first_seed = random.sample(range(1,1000), 1)[0]
-second_seed = random.sample(range(1001,2000), 1)[0]
+first_seed = int(str(datetime.datetime.now().month) + str(datetime.datetime.now().day))
+second_seed = int(str(datetime.datetime.now().year) + str(datetime.datetime.now().month) + str(datetime.datetime.now().day))
+# first_seed = random.sample(range(1,1000), 1)[0]
+# second_seed = random.sample(range(1001,2000), 1)[0]
 random.seed(first_seed)
 
 # 이미지 파일 로드
@@ -25,7 +28,7 @@ with open('./eng_formation_dict.json', 'r') as f :
  
 with open('./entry.json', 'r') as f : 
 	entry = json.load(f)
- 
+    
 @st.cache_data
 def fontRegistered():
     font_dirs = [os.getcwd() + '/customFonts']
@@ -573,4 +576,3 @@ with st.spinner("포지션 배치 중"):
             st.subheader(f"{key[-1]}쿼터")
             st.pyplot(loaded_image)
             st.write("")
-                
