@@ -339,7 +339,7 @@ with st.sidebar:
                         plt.scatter(vc, hc,s=30**2, color=c, alpha=1)
                         plt.text(vc, hc, dt, fontdict={'size': 14},  verticalalignment='center' , horizontalalignment='center', alpha=1)
                         if not dt == mp:
-                            plt.text(vc, hc-1, mp, fontdict={'size': 18},  verticalalignment='center' , horizontalalignment='center', alpha=1)
+                            plt.text(vc, hc-1.1, mp, fontdict={'size': 18},  verticalalignment='center' , horizontalalignment='center', alpha=1)
             
             st.pyplot(graph_fig_dict['fig1'])
             st.pyplot(graph_fig_dict['fig2'])
