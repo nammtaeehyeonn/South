@@ -69,23 +69,24 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
         edited_entry_df = st.data_editor(entry_df, use_container_width=True)
         
         st.write("**스쿼드 분석**")
-        # st.write(f"공격수 : {(entry_df['주포지션'].str[-1] == 'F').sum()}")
-        # st.write(f"미드필더 :{(entry_df['주포지션'].str[-1] == 'M').sum()}")
-        # st.write(f"수비수: {(entry_df['주포지션'].str[-1] == 'B').sum()}")
-        # st.write(f"골키퍼 : {(entry_df['주포지션'].str[-1] == 'K').sum()}")
         
         main_pos_list = []
-        for i in ['GK', 'CB', 'CM', 'CF', 'GK_tmp','WB', 'WM', 'WF']:
-            if i == 'GK_tmp':
-                main_pos_list.append(0)    
-            else:
-                main_pos_list.append((entry_df['주포지션'] == i).sum())       
-        chart_data= pd.DataFrame(
-            {"position": ['골키퍼', '수비수', '미드필더', '공격수'], "중앙": main_pos_list[:4], "윙": main_pos_list[4:]}
-        )
-        st.bar_chart(
-        chart_data, x="position", y=["중앙", "윙"], color=["#FF0000", "#0000FF"]  # Optional
-        )
+        for i in ['GK','CB', 'WB', 'CM', 'WM', 'CF', 'WF']:
+            main_pos_list.append((entry_df['주포지션'] == i).sum()) 
+                
+        chart_data= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": main_pos_list[:4], "윙": [0] + main_pos_list[4:]})
+        st.bar_chart(chart_data, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"])
+
+        col1, col2 = st.columns(2)
+        for idx, col in enumerate([col1, col2, col1, col2]):
+            with col:
+                st.caption(f"{chart_data['포지션'][idx]}")
+                if idx == 0:
+                    mini_df = pd.DataFrame([main_pos_list[idx]], columns=['총원'])
+                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+                else:
+                    mini_df = pd.DataFrame([[main_pos_list[idx]+main_pos_list[idx+3],main_pos_list[idx],main_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
+                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
 
 
 with st.sidebar:
