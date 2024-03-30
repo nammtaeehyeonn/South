@@ -296,11 +296,11 @@ with st.sidebar:
     fontRegistered()
     plt.rc('font', family='NanumGothic')
     fig, ax = plt.subplots(figsize=(6, 8))
-    # plt.gca().axes.xaxis.set_visible(False)
-    # plt.gca().axes.yaxis.set_visible(False)
     
     # 4-3-3
     fig1 = plt.figure(figsize=(6, 8))
+    plt.gca().axes.xaxis.set_visible(False)
+    plt.gca().axes.yaxis.set_visible(False)
     plt.xlim(2, 18)
     plt.ylim(2, 18)
     
@@ -321,6 +321,8 @@ with st.sidebar:
 
     # 3-5-2
     fig2 = plt.figure(figsize=(6, 8))
+    plt.gca().axes.xaxis.set_visible(False)
+    plt.gca().axes.yaxis.set_visible(False)
     plt.xlim(2, 18)
     plt.ylim(2, 18)
     
@@ -341,6 +343,8 @@ with st.sidebar:
 
     # 3-4-3
     fig3 = plt.figure(figsize=(6, 8))
+    plt.gca().axes.xaxis.set_visible(False)
+    plt.gca().axes.yaxis.set_visible(False)
     plt.xlim(2, 18)
     plt.ylim(2, 18)
     
@@ -358,10 +362,12 @@ with st.sidebar:
     plt.scatter(14, 8)
     
     plt.scatter(10, 4,s=15**2)
-    plt.text(10-0.7, 4-0.7, '남태현')
+    plt.text(10-0.7, 4-0.7, '남태현', fontdict={'size': 14})
 
     # 4-2-2-2
     fig4 = plt.figure(figsize=(6, 8))
+    plt.gca().axes.xaxis.set_visible(False)
+    plt.gca().axes.yaxis.set_visible(False)
     plt.xlim(2, 18)
     plt.ylim(2, 18)
     
