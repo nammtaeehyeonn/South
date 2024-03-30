@@ -53,11 +53,11 @@ if st.button('깃허브에 커밋 & 푸시하기'):
     # subprocess를 사용하여 깃 명령어를 실행합니다.
     try:
         # 깃 add 명령어를 실행합니다.
-        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "add", "."], check=True, stderr=subprocess.PIPE)
         # 깃 commit 명령어를 실행합니다.
-        subprocess.run(["git", "commit", "-m", commit_message], check=True)
+        subprocess.run(["git", "commit", "-m", commit_message], check=True, stderr=subprocess.PIPE)
         # 깃 push 명령어를 실행합니다.
-        subprocess.run(["git", "push"], check=True)
+        subprocess.run(["git", "push"], check=True, stderr=subprocess.PIPE)
         st.success('깃허브에 성공적으로 커밋 & 푸시되었습니다.')
     except subprocess.CalledProcessError as e:
         st.error(f'명령어 실행 중 오류가 발생했습니다: {e}')
