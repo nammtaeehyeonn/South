@@ -33,12 +33,23 @@ if 'all_entry_dict' not in st.session_state:
     print("="*100)
     print("load all_entry")
     print("="*100)
+    
+with open("./0330/eng_formation_dict.json", "r") as f:
+    eng_formation_dict = json.load(f)   
+eng_formation_list = list(eng_formation_dict.keys())
+if 'eng_formation_dict' not in st.session_state:
+    st.session_state.eng_formation_dict = {"eng_formation_dict":eng_formation_dict}
+    print("="*100)
+    print("load eng_formation")
+    print("="*100)
 
 
 if 'game_info' not in st.session_state:
     st.session_state['game_info'] = {}
 if 'squad_info' not in st.session_state:
     st.session_state['squad_info'] = {}
+if 'formation_info' not in st.session_state:
+    st.session_state['formation_info'] = {}    
 
 st.title("SOUTH_MAKER")
 
@@ -51,6 +62,8 @@ with st.expander('**1️⃣ 경기 정보 입력**'):
     start_time = st.time_input("**경기 시간**", datetime.time(9,00), step=datetime.timedelta(minutes = 30))
     st.write("")
     location = st.text_input("**경기 장소**")
+    if location:
+        st.page_link(f"https://map.naver.com/p/search/{location}?c=15.00,0,0,0,dh", label="구장찾기🚙🚗🚓", icon="🏁")
     st.divider()
     st.write("")
     opposing_team = st.text_input("**상대팀 명**")
@@ -108,9 +121,35 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
                     edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
 
 
+with st.expander('**3️⃣ 포메이션 입력**'):
+    st.divider()
+    formation1 = st.selectbox('**1쿼터 포메이션**',eng_formation_list, key="formation1")
+    formation2 = st.selectbox('**2쿼터 포메이션**',eng_formation_list, key="formation2")
+    formation3 = st.selectbox('**3쿼터 포메이션**',eng_formation_list, key="formation3")
+    formation4 = st.selectbox('**4쿼터 포메이션**',eng_formation_list, key="formation4")
+    st.session_state['formation_info']['formation'] = [formation1, formation2, formation3, formation4]
+    
+    if "선택" not in st.session_state['formation_info']['formation']:
+        tab1, tab2, tab3, tab4 = st.tabs(["1쿼터", "2쿼터", "3쿼터", "4쿼터"])
+        
+        with tab1:
+            st.write("tab1")
+        with tab2:
+            st.write("tab2")
+        with tab3:
+            st.write("tab3")
+        with tab4:
+            st.write("tab4")
+    
+    
+
+
+
+
 with st.sidebar:
     st.write(st.session_state['game_info'])
     st.write(st.session_state['squad_info'])
+    st.write(st.session_state['formation_info'])
     
 
 
