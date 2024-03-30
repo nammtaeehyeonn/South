@@ -40,24 +40,35 @@ if st.button("정보 저장"):
 
 
 
-
-
-
-
     
-# 버튼을 생성합니다.
-if st.button('깃허브에 커밋 & 푸시하기'):
-    # 현재 시간을 커밋 메시지로 사용합니다.
-    commit_message = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# # 버튼을 생성합니다.
+# if st.button('깃허브에 커밋 & 푸시하기'):
+#     # 현재 시간을 커밋 메시지로 사용합니다.
+#     commit_message = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # subprocess를 사용하여 깃 명령어를 실행합니다.
+#     # subprocess를 사용하여 깃 명령어를 실행합니다.
+#     try:
+#         # 깃 add 명령어를 실행합니다.
+#         subprocess.run(["git", "add", "."], check=True, stderr=subprocess.PIPE)
+#         # 깃 commit 명령어를 실행합니다.
+#         subprocess.run(["git", "commit", "-m", commit_message], check=True, stderr=subprocess.PIPE)
+#         # 깃 push 명령어를 실행합니다.
+#         subprocess.run(["git", "push"], check=True, stderr=subprocess.PIPE)
+#         st.success('깃허브에 성공적으로 커밋 & 푸시되었습니다.')
+#     except subprocess.CalledProcessError as e:
+#         st.error(f'명령어 실행 중 오류가 발생했습니다: {e}')
+
+
+if st.button("깃허브에 커밋 & 푸시하기"):
+    commit_message = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
     try:
-        # 깃 add 명령어를 실행합니다.
-        subprocess.run(["git", "add", "."], check=True, stderr=subprocess.PIPE)
-        # 깃 commit 명령어를 실행합니다.
-        subprocess.run(["git", "commit", "-m", commit_message], check=True, stderr=subprocess.PIPE)
-        # 깃 push 명령어를 실행합니다.
-        subprocess.run(["git", "push"], check=True, stderr=subprocess.PIPE)
-        st.success('깃허브에 성공적으로 커밋 & 푸시되었습니다.')
+        # 깃 명령어 실행
+        subprocess.run(["git", "config", "--global", "user.name", "namtaehyeon"], check=True)
+        subprocess.run(["git", "config", "--global", "user.email", "skaxogusdl@gmail.com"], check=True)
+        subprocess.run(["git", "add", "."], check=True)
+        subprocess.run(["git", "commit", "-m", commit_message], check=True)
+        subprocess.run(["git", "push"], check=True)
+        st.success("깃허브에 성공적으로 커밋 & 푸시되었습니다.")
     except subprocess.CalledProcessError as e:
-        st.error(f'명령어 실행 중 오류가 발생했습니다: {e}')
+        st.error(f"명령어 실행 중 오류가 발생했습니다: {e}")
