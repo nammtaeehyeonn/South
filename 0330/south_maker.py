@@ -140,7 +140,6 @@ with st.expander('**3️⃣ 포메이션 입력**'):
         con_dict = {}
         for tdx, tab in enumerate([tab1, tab2, tab3, tab4]):
             with tab:
-                st.markdown('<span style="color:blue; font-weight:bold; font-size:25px;">* 왼쪽부터 작성(위->아래 == 왼쪽->오른쪽)</span>', unsafe_allow_html=True)
                 con_dict[tab] = {}
                 splited_formation = formation_list[tdx].split("-")
                 st.session_state['formation_info'][f'{tdx+1}q'] = eng_formation_dict[formation_list[tdx]][::-1] + [["GK"]]
@@ -159,17 +158,17 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                             cols1, cols2, cols3, cols4 = st.columns(4)
                             if cols_num == '2':
                                 if (splited_formation == ['4','2','2','2']) & ((horizon_cont_count)*(-1) == -2):
-                                    cols_num2_1 = cols1.multiselect('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",placeholder=placeholder_list[0])
-                                    cols_num2_2 = cols4.multiselect('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",placeholder=placeholder_list[1])
+                                    cols_num2_1 = cols1.multiselect('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",placeholder="L"+placeholder_list[0])
+                                    cols_num2_2 = cols4.multiselect('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",placeholder="R"+placeholder_list[1])
                                 else:
                                     cols_num2_1 = cols2.multiselect('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",placeholder=placeholder_list[0])
                                     cols_num2_2 = cols3.multiselect('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",placeholder=placeholder_list[1])
                                 for_session_list = cols_num2_1+cols_num2_2
                             else:
-                                cols_num4_1 = cols1.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",placeholder=placeholder_list[0])
+                                cols_num4_1 = cols1.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",placeholder="L"+placeholder_list[0])
                                 cols_num4_2 = cols2.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",placeholder=placeholder_list[1])
                                 cols_num4_3 = cols3.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",placeholder=placeholder_list[2])
-                                cols_num4_4 = cols4.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",placeholder=placeholder_list[3])
+                                cols_num4_4 = cols4.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",placeholder="R"+placeholder_list[3])
                                 for_session_list = cols_num4_1 + cols_num4_2 + cols_num4_3 + cols_num4_4 
                         if cols_num in ['1','3','5']:
                             cols1, cols2, cols3, cols4, cols5 = st.columns(5)
@@ -177,16 +176,16 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                                 cols_num1_1 = cols3.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",placeholder=placeholder_list[0])
                                 for_session_list = cols_num1_1
                             if cols_num == '3':
-                                cols_num3_1 = cols2.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",placeholder=placeholder_list[0])
+                                cols_num3_1 = cols2.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",placeholder="L"+placeholder_list[0])
                                 cols_num3_2 = cols3.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",placeholder=placeholder_list[1])
-                                cols_num3_3 = cols4.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",placeholder=placeholder_list[2])
+                                cols_num3_3 = cols4.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",placeholder="R"+placeholder_list[2])
                                 for_session_list = cols_num3_1 + cols_num3_2 + cols_num3_3
                             if cols_num == '5':
-                                cols_num5_1 = cols1.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",placeholder=placeholder_list[0])
+                                cols_num5_1 = cols1.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",placeholder="L"+placeholder_list[0])
                                 cols_num5_2 = cols2.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",placeholder=placeholder_list[1])
                                 cols_num5_3 = cols3.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",placeholder=placeholder_list[2])
                                 cols_num5_4 = cols4.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",placeholder=placeholder_list[3])
-                                cols_num5_5 = cols5.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 5", label_visibility="collapsed",placeholder=placeholder_list[4])
+                                cols_num5_5 = cols5.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 5", label_visibility="collapsed",placeholder="R"+placeholder_list[4])
                                 for_session_list = cols_num5_1 + cols_num5_2 + cols_num5_3 + cols_num5_4 + cols_num5_5
                         st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = for_session_list
                         
