@@ -15,7 +15,8 @@ import subprocess
 
 from pymongo.mongo_client import MongoClient
 
-    
+st.set_page_config(layout="wide")
+
 uri = "mongodb+srv://skaxogusdl:skaclxo661@southdb.h5j75si.mongodb.net/?retryWrites=true&w=majority&appName=SOUTHDB"
 client = MongoClient(uri)
 db = client.mydb
