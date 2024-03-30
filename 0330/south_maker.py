@@ -68,6 +68,7 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
         entry_df = pd.DataFrame([{"선수명":p, "주포지션":all_entry_dict[p]["주포지션"], "부포지션":all_entry_dict[p]["부포지션"]} for p in players], index = [idx+1 for idx in range(len(players))])
         edited_entry_df = st.data_editor(entry_df, use_container_width=True)
         
+        st.write("")
         st.write("**스쿼드 분석**")
         
         main_pos_list = []
@@ -77,10 +78,8 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
         chart_data= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": main_pos_list[:4], "윙": [0] + main_pos_list[4:]})
         st.bar_chart(chart_data, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"])
 
-        # col1, col2 = st.columns(2)
-        # for idx, col in enumerate([col1, col2, col1, col2]):
+        st.write(f"전체인원 : {len(entry_df)}명")
         
-        # with col:
         for idx in range(4):
             st.caption(f"{chart_data['포지션'][idx]}")
             if idx == 0:
