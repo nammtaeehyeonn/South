@@ -15,25 +15,35 @@ import subprocess
 
 from pymongo.mongo_client import MongoClient
 
+    
 uri = "mongodb+srv://skaxogusdl:skaclxo661@southdb.h5j75si.mongodb.net/?retryWrites=true&w=majority&appName=SOUTHDB"
-
-# Create a new client and connect to the server
 client = MongoClient(uri)
-try:
-    client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
-    
-
 db = client.mydb
+if 'DB' not in st.session_state:
+    st.session_state.DB = {"uri":uri, "client":client, "db":db}
+    print("="*100)
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+    print("="*100)
+    
+with open("./all_entry.json", "r") as f:
+    all_entry_dict = json.load(f)   
+all_players_list = list(all_entry_dict.keys())
+if 'all_entry_dict' not in st.session_state:
+    st.session_state.all_entry_dict = {"all_entry_dict":all_entry_dict}
+    print("="*100)
+    print("load all_entry")
+    print("="*100)
 
-    
-    
-    
-all_players_list = ["김동선" ,"김선광" ,"김성재" ,"김영목" ,"김은민" ,"김철영" ,"남태현" ,"민병인" ,"박창후" ,"서윤찬" ,"서종민" ,"소지호" ,"이병훈" ,"이산호" ,"이재성" ,"이종현" ,"정지원" ,"조성민" ,"조영수" ,"차민재" ,"차종수" ,"최민규" ,"최형근" ,"최형주" ,"구형준" ,"홍태호", "용병1", "용병2", "용병3", "용병4", "용병5" ]
+
+if 'game_info' not in st.session_state:
+    st.session_state['game_info'] = {}
+if 'squad_info' not in st.session_state:
+    st.session_state['squad_info'] = {}
 
 st.title("SOUTH_MAKER")
+
+
+    
 with st.expander('**1️⃣ 경기 정보 입력**'):
     st.divider()
     date = st.date_input("**경기 날짜**")
@@ -45,15 +55,25 @@ with st.expander('**1️⃣ 경기 정보 입력**'):
     st.write("")
     opposing_team = st.text_input("**상대팀 명**")
     
+    st.session_state['game_info']['date'] = date
+    st.session_state['game_info']['start_time'] = start_time
+    st.session_state['game_info']['location'] = location
+    st.session_state['game_info']['opposing_team'] = opposing_team
+    
 with st.expander('**2️⃣ 스쿼드 입력**'):
     st.divider()
     players = st.multiselect("**참가 인원**", all_players_list)
+    st.session_state['squad_info']['players'] = players
+    if st.session_state['squad_info']['players']:
+        entry_df = pd.DataFrame([{"선수명":p, "주포지션":all_entry_dict[p]["주포지션"], "부포지션":all_entry_dict[p]["부포지션"]} for p in players], index = [idx+1 for idx in range(len(players))])
+        edited_entry_df = st.data_editor(entry_df, use_container_width=True)
 
 
 
-
-
-
+with st.sidebar:
+    st.write(st.session_state['game_info'])
+    st.write(st.session_state['squad_info'])
+    
 
 
 
