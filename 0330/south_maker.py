@@ -286,10 +286,96 @@ with st.sidebar:
     
     
     
-    fig, ax = plt.subplots(figsize=(2, 4))
-    plt.gca().axes.xaxis.set_visible(False)
-    plt.gca().axes.yaxis.set_visible(False)
-    st.pyplot(fig)
+    fig, ax = plt.subplots(figsize=(6, 8))
+    # plt.gca().axes.xaxis.set_visible(False)
+    # plt.gca().axes.yaxis.set_visible(False)
+    
+    # 4-3-3
+    fig1 = plt.figure(figsize=(6, 8))
+    plt.xlim(2, 18)
+    plt.ylim(2, 18)
+    
+    plt.scatter(6, 12)
+    plt.scatter(10, 12)
+    plt.scatter(14, 12)
+    
+    plt.scatter(6, 16)
+    plt.scatter(10, 16)
+    plt.scatter(14, 16)
+    
+    plt.scatter(4, 8)
+    plt.scatter(8, 8)
+    plt.scatter(12, 8)
+    plt.scatter(16, 8)
+    
+    plt.scatter(10, 4)
+
+    # 3-5-2
+    fig2 = plt.figure(figsize=(6, 8))
+    plt.xlim(2, 18)
+    plt.ylim(2, 18)
+    
+    plt.scatter(8, 16)
+    plt.scatter(12, 16)
+    
+    plt.scatter(4, 12)
+    plt.scatter(7, 12)
+    plt.scatter(10, 12)
+    plt.scatter(13, 12)
+    plt.scatter(16, 12)
+    
+    plt.scatter(6, 8)
+    plt.scatter(10, 8)
+    plt.scatter(14, 8)
+    
+    plt.scatter(10, 4)
+
+    # 3-4-3
+    fig3 = plt.figure(figsize=(6, 8))
+    plt.xlim(2, 18)
+    plt.ylim(2, 18)
+    
+    plt.scatter(6, 16)
+    plt.scatter(10, 16)
+    plt.scatter(14, 16)
+    
+    plt.scatter(4, 12)
+    plt.scatter(8, 12)
+    plt.scatter(12, 12)
+    plt.scatter(16, 12)
+    
+    plt.scatter(6, 8)
+    plt.scatter(10, 8)
+    plt.scatter(14, 8)
+    
+    plt.scatter(10, 4)
+
+    # 4-2-2-2
+    fig4 = plt.figure(figsize=(6, 8))
+    plt.xlim(2, 18)
+    plt.ylim(2, 18)
+    
+    plt.scatter(8, 16)
+    plt.scatter(12, 16)
+    
+    plt.scatter(4, 13)
+    plt.scatter(16, 13)   
+    
+    plt.scatter(8, 10)
+    plt.scatter(12, 10)
+    
+    plt.scatter(4, 7)
+    plt.scatter(8, 7)
+    plt.scatter(12, 7)
+    plt.scatter(16, 7)
+    
+    plt.scatter(10, 4)
+    
+    
+    st.pyplot(fig1)
+    st.pyplot(fig2)
+    st.pyplot(fig3)
+    st.pyplot(fig4)
         
      
 
