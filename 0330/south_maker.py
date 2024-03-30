@@ -12,6 +12,7 @@ import matplotlib.font_manager as fm
 import time
 import datetime
 import subprocess
+import copy
 
 from pymongo.mongo_client import MongoClient
 
@@ -46,6 +47,7 @@ if 'all_entry_dict' not in st.session_state:
     
 with open("./0330/eng_formation_dict.json", "r") as f:
     eng_formation_dict = json.load(f)   
+for_dot_position = copy.deepcopy(eng_formation_dict)
 eng_formation_list = list(eng_formation_dict.keys())
 if 'eng_formation_dict' not in st.session_state:
     st.session_state.eng_formation_dict = {"eng_formation_dict":eng_formation_dict}
@@ -302,6 +304,7 @@ with st.sidebar:
     graph_fig_dict = dict()
     scatter_horizon_dict = {4 : [16,12,8,4], 5 : [16,13,10,7,4]} 
     scatter_vertical_dict = {1 : [10], 2 : [8,12], 3 : [6,10,14], 4 : [4,8,12,16], 5 : [4,7,10,13,16]} 
+    color_dict = {4 : ['red','green','blue','yellow'], 5 : ['red','green','green','blue','yellow']} 
     for fdx, formation in enumerate(formation_list):
         graph_fig_dict[f"fig{fdx+1}"] = plt.figure(figsize=(6, 8))
         plt.gca().axes.xaxis.set_visible(False)
@@ -310,17 +313,17 @@ with st.sidebar:
         plt.ylim(2, 18)
         
         scatter_dot = formation.split("-")[::-1] + ['1']
-        
         horizon_coordinate = scatter_horizon_dict[len(scatter_dot)]
         vertical_coordinate = [scatter_vertical_dict[int(i)] for i in scatter_dot]
-        if formation == '4-2-2-2':
-            vertical_coordinate[1] = [4,16]
+        dot_text_pos = for_dot_position[formation][::-1] + [['GK']]
+        color = color_dict[len(scatter_dot)]
+        if formation == '4-2-2-2': vertical_coordinate[1] = [4,16]
         
-        for hc, vc_list in zip(horizon_coordinate, vertical_coordinate):
-            for vc in vc_list:
-                plt.scatter(vc, hc,s=30**2)
-                plt.text(vc-0.6, hc-0.2, 'GK', fontdict={'size': 18})
-                plt.text(vc-1.2, hc-1.2, '남태현', fontdict={'size': 18})
+        for hc, vc_list, dt_list,c in zip(horizon_coordinate, vertical_coordinate, dot_text_pos,color):
+            for vc,dt in zip(vc_list, dt_list):
+                plt.scatter(vc, hc,s=30**2, color=c)
+                plt.text(vc, hc, dt, fontdict={'size': 14},  verticalalignment='center' , horizontalalignment='center')
+                plt.text(vc, hc-1, '남태현', fontdict={'size': 18},  verticalalignment='center' , horizontalalignment='center')
         print()
     print("-"*100)
         
