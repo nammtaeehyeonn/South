@@ -138,9 +138,9 @@ with st.expander('**3️⃣ 포메이션 입력**'):
         formation_list = list(st.session_state['formation_info']['formation'].values())
         tab1, tab2, tab3, tab4 = st.tabs(["1쿼터", "2쿼터", "3쿼터", "4쿼터"])
         con_dict = {}
-        
         for tdx, tab in enumerate([tab1, tab2, tab3, tab4]):
             with tab:
+                st.markdown('<span style="color:blue; font-weight:bold; font-size:25px;">* 왼쪽부터 작성(위->아래 == 왼쪽->오른쪽)</span>', unsafe_allow_html=True)
                 con_dict[tab] = {}
                 splited_formation = formation_list[tdx].split("-")
                 st.session_state['formation_info'][f'{tdx+1}q'] = eng_formation_dict[formation_list[tdx]][::-1] + [["GK"]]
