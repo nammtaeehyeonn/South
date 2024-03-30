@@ -144,7 +144,7 @@ with st.expander('**3️⃣ 포메이션 입력**'):
     formation3 = st.selectbox('**3쿼터 포메이션**',eng_formation_list, key="formation3")
     formation4 = st.selectbox('**4쿼터 포메이션**',eng_formation_list, key="formation4")
     st.session_state['formation_info']['formation'] = {"1q": formation1, "2q": formation2, "3q": formation3, "4q": formation4}
-    
+    print(formation1)
     if "선택" not in list(st.session_state['formation_info']['formation'].values()):
         formation_list = list(st.session_state['formation_info']['formation'].values())
         tab1, tab2, tab3, tab4 = st.tabs(["1쿼터", "2쿼터", "3쿼터", "4쿼터"])
@@ -159,12 +159,14 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                     con_dict[tab]['formation'] = splited_formation
                     con_dict[tab][f'container{horizon_cont_count}'] = st.container(border=True)
                     with con_dict[tab][f'container{horizon_cont_count}']:
+                        # cols_num2_1 = False
                         markdown_formation = splited_formation[::-1]
                         markdown_formation[horizon_cont_count-1] = f'<span style="color:blue; font-weight:bold; font-size:25px;">{markdown_formation[horizon_cont_count-1]}</span>'
                         st.markdown(f'**{"-".join(markdown_formation[::-1])}**', unsafe_allow_html=True)
 
                         cols_num = splited_formation[(horizon_cont_count)*(-1)]
                         placeholder_list = st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1]
+                        # print(tdx)
                         if cols_num in ['2','4']:
                             cols1, cols2, cols3, cols4 = st.columns(4)
                             if cols_num == '2':
@@ -172,44 +174,62 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                                     cols_num2_1 = cols1.selectbox('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
                                     cols_num2_2 = cols4.selectbox('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[1])
                                 else:
-                                    cols_num2_1 = cols2.selectbox('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder=placeholder_list[0])
-                                    cols_num2_2 = cols3.selectbox('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
+                                    cols_num2_1 = cols2.selectbox('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[0])
+                                    cols_num2_2 = cols3.selectbox('tmp', entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
                                 if cols_num2_1:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0] = cols_num2_1
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [cols_num2_1,
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1]]
                                 if cols_num2_2:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1] = cols_num2_2
-                                # for_session_list = cols_num2_1+cols_num2_2
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], cols_num2_2]
                             else:
                                 cols_num4_1 = cols1.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
                                 cols_num4_2 = cols2.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
                                 cols_num4_3 = cols3.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[2])
                                 cols_num4_4 = cols4.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[3])
                                 if cols_num4_1:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0] = cols_num4_1
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [cols_num4_1,
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3]]
                                 if cols_num4_2:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1] = cols_num4_2
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
+                                                                                                             cols_num4_2,
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3]]
                                 if cols_num4_3:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2] = cols_num4_3
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                             cols_num4_3,
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3]]
                                 if cols_num4_4:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3] = cols_num4_4
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                             st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                             cols_num4_4]
                                 # for_session_list = cols_num4_1 + cols_num4_2 + cols_num4_3 + cols_num4_4 
                         if cols_num in ['1','3','5']:
                             cols1, cols2, cols3, cols4, cols5 = st.columns(5)
                             if cols_num == '1':
                                 cols_num1_1 = cols3.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[0])
                                 if cols_num1_1:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0] = cols_num1_1
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [cols_num1_1]
                                 # for_session_list = cols_num1_1
                             if cols_num == '3':
                                 cols_num3_1 = cols2.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
                                 cols_num3_2 = cols3.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
                                 cols_num3_3 = cols4.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[2])
                                 if cols_num3_1:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0] = cols_num3_1
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [cols_num3_1,
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1], 
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2]]
                                 if cols_num3_2:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1] = cols_num3_2
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                            cols_num3_2, 
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2]]
                                 if cols_num3_3:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2] = cols_num3_3
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                            cols_num3_3]
                                 # for_session_list = cols_num3_1 + cols_num3_2 + cols_num3_3
                             if cols_num == '5':
                                 cols_num5_1 = cols1.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
@@ -218,18 +238,38 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                                 cols_num5_4 = cols4.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder=placeholder_list[3])
                                 cols_num5_5 = cols5.selectbox('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 5", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[4])
                                 if cols_num5_1:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0] = cols_num5_1
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [cols_num5_1,
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
                                 if cols_num5_2:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1] = cols_num5_2
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                            cols_num5_2,
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
                                 if cols_num5_3:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2] = cols_num5_3
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                            cols_num5_3,
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
                                 if cols_num5_4:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3] = cols_num5_4
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                            cols_num5_4,
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
                                 if cols_num5_5:
-                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4] = cols_num5_5
+                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
+                                                                                                            cols_num5_5]
                                 # for_session_list = cols_num5_1 + cols_num5_2 + cols_num5_3 + cols_num5_4 + cols_num5_5
                         # st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = for_session_list
-                        
+                            
                 keep_container = st.container(border=True)
                 with keep_container:
                     for_session_list_GK = []
@@ -237,7 +277,7 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                     cols1, cols2, cols3, cols4, cols5 = st.columns(5)
                     for_session_list_GK = cols3.selectbox('tmp',entry_df['선수명'], key=f"selected_key : GK_{tdx}", label_visibility="collapsed",index=None,placeholder="GK")
                     if for_session_list_GK:
-                        st.session_state['formation_info'][f'{tdx+1}q'][-1] = for_session_list_GK
+                        st.session_state['formation_info'][f'{tdx+1}q'][-1] = [for_session_list_GK]
 
 
 
@@ -246,55 +286,7 @@ with st.sidebar:
     st.write(st.session_state['game_info'])
     st.write(st.session_state['squad_info'])
     st.write(st.session_state['formation_info'])
-    
-    # if "선택" not in list(st.session_state['formation_info']['formation'].values()):
-    #     formation_list = list(st.session_state['formation_info']['formation'].values())
-    #     tab_list = ["1쿼터", "2쿼터", "3쿼터", "4쿼터"]
-    #     for tdx, tab in enumerate(tab_list):
-    #         st.write(tab)
-    #         marking_players = st.session_state['formation_info'][f'{tdx+1}q'][:]
-    #         splited_formation = formation_list[tdx].split("-")
-    #         for horizon_cont in range(len(splited_formation)):
-    #             horizon_cont_count = horizon_cont+1
-    #             cols_num = splited_formation[(horizon_cont_count)*(-1)]
-    #             if cols_num in ['2','4']:
-    #                 cols1, cols2, cols3, cols4 = st.columns(4)
-    #                 if cols_num == '2':
-    #                     if (splited_formation == ['4','2','2','2']) & ((horizon_cont_count)*(-1) == -2):
-    #                         cols_num2_1 = cols1.subheader(marking_players[0][0])
-    #                         cols_num2_2 = cols4.subheader(marking_players[0][1])
-    #                     else:
-    #                         cols_num2_1 = cols2.subheader(marking_players[0][0])
-    #                         cols_num2_2 = cols3.subheader(marking_players[0][1])
-    #                 else:
-    #                     cols_num4_1 = cols1.subheader(marking_players[0][0])
-    #                     cols_num4_2 = cols2.subheader(marking_players[0][1])
-    #                     cols_num4_3 = cols3.subheader(marking_players[0][2])
-    #                     cols_num4_4 = cols4.subheader(marking_players[0][3])
-    #             if cols_num in ['1','3','5']:
-    #                 cols1, cols2, cols3, cols4, cols5 = st.columns(5)
-    #                 if cols_num == '1':
-    #                     cols_num1_1 = cols3.subheader(marking_players[0][0])
-    #                 if cols_num == '3':
-    #                     cols_num3_1 = cols2.subheader(marking_players[0][0])
-    #                     cols_num3_2 = cols3.subheader(marking_players[0][1])
-    #                     cols_num3_3 = cols4.subheader(marking_players[0][2])
-    #                 if cols_num == '5':
-    #                     cols_num5_1 = cols1.subheader(marking_players[0][0])
-    #                     cols_num5_2 = cols2.subheader(marking_players[0][1])
-    #                     cols_num5_3 = cols3.subheader(marking_players[0][2])
-    #                     cols_num5_4 = cols4.subheader(marking_players[0][3])
-    #                     cols_num5_5 = cols5.subheader(marking_players[0][4])
 
-    #             marking_players.pop(0)
-
-
-    #         cols1, cols2, cols3, cols4, cols5 = st.columns(5)
-    #         gk_marking = st.session_state['formation_info'][f'{tdx+1}q'][-1]
-    #         cols3.subheader(gk_marking[0] if isinstance(gk_marking,list)  else gk_marking)
-
-    
-    # if "선택" not in list(st.session_state['formation_info']['formation'].values()):
     fontRegistered()
     plt.rc('font', family='NanumGothic')
     
@@ -304,13 +296,15 @@ with st.sidebar:
     graph_fig_dict = dict()
     scatter_horizon_dict = {4 : [16,12,8,4], 5 : [16,13,10,7,4]} 
     scatter_vertical_dict = {1 : [10], 2 : [8,12], 3 : [6,10,14], 4 : [4,8,12,16], 5 : [4,7,10,13,16]} 
-    color_dict = {4 : ['red','green','blue','yellow'], 5 : ['red','green','green','blue','yellow']} 
+    color_dict = {4 : ['red','green','orange','yellow'], 5 : ['red','green','green','orange','yellow']} 
     for fdx, formation in enumerate(formation_list):
         graph_fig_dict[f"fig{fdx+1}"] = plt.figure(figsize=(6, 8))
         plt.gca().axes.xaxis.set_visible(False)
         plt.gca().axes.yaxis.set_visible(False)
         plt.xlim(2, 18)
         plt.ylim(2, 18)
+            
+        marking_players = st.session_state['formation_info'][f'{fdx+1}q'][:]
         
         scatter_dot = formation.split("-")[::-1] + ['1']
         horizon_coordinate = scatter_horizon_dict[len(scatter_dot)]
@@ -319,109 +313,12 @@ with st.sidebar:
         color = color_dict[len(scatter_dot)]
         if formation == '4-2-2-2': vertical_coordinate[1] = [4,16]
         
-        for hc, vc_list, dt_list,c in zip(horizon_coordinate, vertical_coordinate, dot_text_pos,color):
-            for vc,dt in zip(vc_list, dt_list):
+        for c, hc, vc_list, dt_list, mp_list in zip(color, horizon_coordinate, vertical_coordinate, dot_text_pos, marking_players):
+            for vc,dt,mp in zip(vc_list, dt_list, mp_list):
                 plt.scatter(vc, hc,s=30**2, color=c)
                 plt.text(vc, hc, dt, fontdict={'size': 14},  verticalalignment='center' , horizontalalignment='center')
-                plt.text(vc, hc-1, '남태현', fontdict={'size': 18},  verticalalignment='center' , horizontalalignment='center')
-        print()
-    print("-"*100)
-        
-            
-    
-    
-    
-    # 4-3-3
-    # fig1 = plt.figure(figsize=(6, 8))
-    # plt.gca().axes.xaxis.set_visible(False)
-    # plt.gca().axes.yaxis.set_visible(False)
-    # plt.xlim(2, 18)
-    # plt.ylim(2, 18)
-    
-    # plt.scatter(6, 12)
-    # plt.scatter(10, 12)
-    # plt.scatter(14, 12)
-    
-    # plt.scatter(6, 16)
-    # plt.scatter(10, 16)
-    # plt.scatter(14, 16)
-    
-    # plt.scatter(4, 8)
-    # plt.scatter(8, 8)
-    # plt.scatter(12, 8)
-    # plt.scatter(16, 8)
-    
-    # plt.scatter(10, 4)
-
-    # # 3-5-2
-    # fig2 = plt.figure(figsize=(6, 8))
-    # plt.gca().axes.xaxis.set_visible(False)
-    # plt.gca().axes.yaxis.set_visible(False)
-    # plt.xlim(2, 18)
-    # plt.ylim(2, 18)
-    
-    # plt.scatter(8, 16)
-    # plt.scatter(12, 16)
-    
-    # plt.scatter(4, 12)
-    # plt.scatter(7, 12)
-    # plt.scatter(10, 12)
-    # plt.scatter(13, 12)
-    # plt.scatter(16, 12)
-    
-    # plt.scatter(6, 8)
-    # plt.scatter(10, 8)
-    # plt.scatter(14, 8)
-    
-    # plt.scatter(10, 4)
-
-    # # 3-4-3
-    # fig3 = plt.figure(figsize=(6, 8))
-    # plt.gca().axes.xaxis.set_visible(False)
-    # plt.gca().axes.yaxis.set_visible(False)
-    # plt.xlim(2, 18)
-    # plt.ylim(2, 18)
-    
-    # plt.scatter(6, 16)
-    # plt.scatter(10, 16)
-    # plt.scatter(14, 16)
-    
-    # plt.scatter(4, 12)
-    # plt.scatter(8, 12)
-    # plt.scatter(12, 12)
-    # plt.scatter(16, 12)
-    
-    # plt.scatter(6, 8)
-    # plt.scatter(10, 8)
-    # plt.scatter(14, 8)
-    
-    # plt.scatter(10, 4,s=30**2)
-    # plt.text(10-0.6, 4-0.2, 'GK', fontdict={'size': 18})
-    # plt.text(10-1.2, 4-1.2, '남태현', fontdict={'size': 18})
-
-    # # 4-2-2-2
-    # fig4 = plt.figure(figsize=(6, 8))
-    # plt.gca().axes.xaxis.set_visible(False)
-    # plt.gca().axes.yaxis.set_visible(False)
-    # plt.xlim(2, 18)
-    # plt.ylim(2, 18)
-    
-    # plt.scatter(8, 16)
-    # plt.scatter(12, 16)
-    
-    # plt.scatter(4, 13)
-    # plt.scatter(16, 13)   
-    
-    # plt.scatter(8, 10)
-    # plt.scatter(12, 10)
-    
-    # plt.scatter(4, 7)
-    # plt.scatter(8, 7)
-    # plt.scatter(12, 7)
-    # plt.scatter(16, 7)
-    
-    # plt.scatter(10, 4)
-    
+                if not dt == mp:
+                    plt.text(vc, hc-1, mp, fontdict={'size': 18},  verticalalignment='center' , horizontalalignment='center')
     
     st.pyplot(graph_fig_dict['fig1'])
     st.pyplot(graph_fig_dict['fig2'])
