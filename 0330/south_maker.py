@@ -361,7 +361,7 @@ with st.sidebar:
     plt.scatter(10, 8)
     plt.scatter(14, 8)
     
-    plt.scatter(10, 4,s=20**2)
+    plt.scatter(10, 4,s=30**2)
     plt.text(10-1.2, 4-1.2, '남태현', fontdict={'size': 18})
 
     # 4-2-2-2
