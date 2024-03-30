@@ -161,17 +161,17 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                         if cols_num in ['1','3','5']:
                             cols1, cols2, cols3, cols4, cols5 = st.columns(5)
                             if cols_num == '1':
-                                cols3.write("333")
+                                cols3.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 3", label_visibility="collapsed")
                             if cols_num == '3':
-                                cols2.write("222")
-                                cols3.write("333")
-                                cols4.write("444")
+                                cols2.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 2", label_visibility="collapsed")
+                                cols3.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 3", label_visibility="collapsed")
+                                cols4.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 4", label_visibility="collapsed")
                             if cols_num == '5':
-                                cols1.write("111")
-                                cols2.write("222")
-                                cols3.write("333")
-                                cols4.write("444")
-                                cols3.write("555")
+                                cols1.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 1", label_visibility="collapsed")
+                                cols2.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 2", label_visibility="collapsed")
+                                cols3.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 3", label_visibility="collapsed")
+                                cols4.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 4", label_visibility="collapsed")
+                                cols3.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 5", label_visibility="collapsed")
                         
                     
                 keep_container = st.container(border=True)
