@@ -67,27 +67,55 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
     if st.session_state['squad_info']['players']:
         entry_df = pd.DataFrame([{"선수명":p, "주포지션":all_entry_dict[p]["주포지션"], "부포지션":all_entry_dict[p]["부포지션"]} for p in players], index = [idx+1 for idx in range(len(players))])
         edited_entry_df = st.data_editor(entry_df, use_container_width=True)
+        find_sub_pos_series = entry_df['주포지션'] + ","+ entry_df['부포지션'].apply(lambda x : ",".join(x))
         
         st.write("")
         st.write("**스쿼드 분석**")
         
         main_pos_list = []
+        sub_pos_list = []
         for i in ['GK','CB', 'WB', 'CM', 'WM', 'CF', 'WF']:
             main_pos_list.append((entry_df['주포지션'] == i).sum()) 
-                
-        chart_data= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": main_pos_list[:4], "윙": [0] + main_pos_list[4:]})
-        st.bar_chart(chart_data, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"])
-
-        st.write(f"전체인원 : {len(entry_df)}명")
+            sub_pos_list.append((find_sub_pos_series.apply(lambda x : i in x)).sum())
+            
         
-        for idx in range(4):
-            st.caption(f"{chart_data['포지션'][idx]}")
-            if idx == 0:
-                mini_df = pd.DataFrame([main_pos_list[idx]], columns=['총원'])
-                edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
-            else:
-                mini_df = pd.DataFrame([[main_pos_list[idx]+main_pos_list[idx+3],main_pos_list[idx],main_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
-                edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+        tab1, tab2 = st.tabs(["주포지션", "부포지션 포함"])
+        with tab1:
+            chart_data_tab1= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": main_pos_list[:4], "윙": [0] + main_pos_list[4:]})
+            st.bar_chart(chart_data_tab1, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"])
+            st.write(f"전체인원 : {len(entry_df)}명")
+            for idx in range(4):
+                st.caption(f"{chart_data_tab1['포지션'][idx]}")
+                if idx == 0:
+                    mini_df = pd.DataFrame([main_pos_list[idx]], columns=['총원'])
+                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+                else:
+                    mini_df = pd.DataFrame([[main_pos_list[idx]+main_pos_list[idx+3],main_pos_list[idx],main_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
+                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+            
+        with tab2:
+            chart_data_tab2= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": sub_pos_list[:4], "윙": [0] + sub_pos_list[4:]})
+            st.bar_chart(chart_data_tab2, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"])
+            st.write(f"전체인원 : {len(entry_df)}명")
+            for idx in range(4):
+                st.caption(f"{chart_data_tab1['포지션'][idx]}")
+                if idx == 0:
+                    mini_df = pd.DataFrame([sub_pos_list[idx]], columns=['총원'])
+                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+                else:
+                    mini_df = pd.DataFrame([[sub_pos_list[idx]+sub_pos_list[idx+3],sub_pos_list[idx],sub_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
+                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+        
+        
+        # with tab1:
+        #     for idx in range(4):
+        #         st.caption(f"{chart_data_tab1['포지션'][idx]}")
+        #         if idx == 0:
+        #             mini_df = pd.DataFrame([main_pos_list[idx]], columns=['총원'])
+        #             edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+        #         else:
+        #             mini_df = pd.DataFrame([[main_pos_list[idx]+main_pos_list[idx+3],main_pos_list[idx],main_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
+        #             edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
 
 
 with st.sidebar:
