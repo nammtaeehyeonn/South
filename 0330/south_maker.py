@@ -175,12 +175,14 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                                 cols2.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 2", label_visibility="collapsed")
                                 cols3.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 3", label_visibility="collapsed")
                                 cols4.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 4", label_visibility="collapsed")
-                                cols3.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 5", label_visibility="collapsed")
+                                cols5.multiselect('tmp',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 5", label_visibility="collapsed")
                         
                     
                 keep_container = st.container(border=True)
-                keep_container.write("This is keeper the container")
-                
+                with keep_container:
+                    st.markdown('<span style="color:red; font-weight:bold; font-size:25px;">GK</span>', unsafe_allow_html=True)
+                    cols1, cols2, cols3, cols4, cols5 = st.columns(5)
+                    cols3.multiselect('tmp',entry_df['선수명'], key=f"selected_key : GK_{tdx}", label_visibility="collapsed")
 
 
 
