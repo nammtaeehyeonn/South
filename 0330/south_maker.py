@@ -30,8 +30,21 @@ with st.expander('**1️⃣ 경기 정보 입력**'):
 with st.expander('**2️⃣ 스쿼드 입력**'):
     st.divider()
     players = st.multiselect("**참가 인원**", all_players_list)
-    
 
+
+if st.button("정보 저장"):
+    with open("./123.txt", 'a') as f:
+        f.write(str(date))
+
+
+
+
+
+
+
+
+
+    
 # 버튼을 생성합니다.
 if st.button('깃허브에 커밋 & 푸시하기'):
     # 현재 시간을 커밋 메시지로 사용합니다.
