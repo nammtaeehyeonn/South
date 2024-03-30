@@ -127,21 +127,57 @@ with st.expander('**3️⃣ 포메이션 입력**'):
     formation2 = st.selectbox('**2쿼터 포메이션**',eng_formation_list, key="formation2")
     formation3 = st.selectbox('**3쿼터 포메이션**',eng_formation_list, key="formation3")
     formation4 = st.selectbox('**4쿼터 포메이션**',eng_formation_list, key="formation4")
-    st.session_state['formation_info']['formation'] = [formation1, formation2, formation3, formation4]
+    st.session_state['formation_info']['formation'] = {"1q": formation1, "2q": formation2, "3q": formation3, "4q": formation4}
+    st.session_state['formation_info']['1q'] = {}
+    st.session_state['formation_info']['2q'] = {}
+    st.session_state['formation_info']['3q'] = {}
+    st.session_state['formation_info']['4q'] = {}
     
-    if "선택" not in st.session_state['formation_info']['formation']:
+    if "선택" not in list(st.session_state['formation_info']['formation'].values()):
+        formation_list = list(st.session_state['formation_info']['formation'].values())
         tab1, tab2, tab3, tab4 = st.tabs(["1쿼터", "2쿼터", "3쿼터", "4쿼터"])
+        con_dict = {}
         
-        with tab1:
-            st.write("tab1")
-        with tab2:
-            st.write("tab2")
-        with tab3:
-            st.write("tab3")
-        with tab4:
-            st.write("tab4")
-    
-    
+        for tdx, tab in enumerate([tab1, tab2, tab3, tab4]):
+            with tab:
+                con_dict[tab] = {}
+                splited_formation = formation_list[tdx].split("-")
+                for horizon_cont_count in range(len(splited_formation)):
+                    con_dict[tab]['formation'] = splited_formation
+                    con_dict[tab][f'container{horizon_cont_count+1}'] = st.container(border=True)
+                    with con_dict[tab][f'container{horizon_cont_count+1}']:
+                        cols_num = splited_formation[(horizon_cont_count+1)*-1]
+                        if cols_num in ['2','4']:
+                            cols1, cols2, cols3, cols4 = st.columns(4)
+                            if cols_num == '2':
+                                cols2.write("222")
+                                cols3.write("333")
+                            else:
+                                cols1.write("111")
+                                cols2.write("222")
+                                cols3.write("333")
+                                cols4.write("444")
+                        if cols_num in ['1','3','5']:
+                            cols1, cols2, cols3, cols4, cols5 = st.columns(5)
+                            if cols_num == '1':
+                                cols3.write("333")
+                            if cols_num == '3':
+                                cols2.write("222")
+                                cols3.write("333")
+                                cols4.write("444")
+                            if cols_num == '5':
+                                cols1.write("111")
+                                cols2.write("222")
+                                cols3.write("333")
+                                cols4.write("444")
+                                cols3.write("555")
+                            
+                        
+                    
+                keep_container = st.container(border=True)
+                keep_container.write("This is keeper the container")
+                
+
 
 
 
@@ -150,8 +186,6 @@ with st.sidebar:
     st.write(st.session_state['game_info'])
     st.write(st.session_state['squad_info'])
     st.write(st.session_state['formation_info'])
-    
-
 
 
 
