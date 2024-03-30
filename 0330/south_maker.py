@@ -25,7 +25,7 @@ if 'DB' not in st.session_state:
     print("Pinged your deployment. You successfully connected to MongoDB!")
     print("="*100)
     
-with open("./all_entry.json", "r") as f:
+with open("all_entry.json", "r") as f:
     all_entry_dict = json.load(f)   
 all_players_list = list(all_entry_dict.keys())
 if 'all_entry_dict' not in st.session_state:
