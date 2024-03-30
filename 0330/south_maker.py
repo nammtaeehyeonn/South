@@ -15,6 +15,15 @@ import subprocess
 
 from pymongo.mongo_client import MongoClient
 
+@st.cache_data
+def fontRegistered():
+    font_dirs = [os.getcwd() + '/customFonts']
+    font_files = fm.findSystemFonts(fontpaths=font_dirs)
+
+    for font_file in font_files:
+        fm.fontManager.addfont(font_file)
+    fm._load_fontmanager(try_read_cache=False)
+    
 st.set_page_config(layout="wide")
 
 uri = "mongodb+srv://skaxogusdl:skaclxo661@southdb.h5j75si.mongodb.net/?retryWrites=true&w=majority&appName=SOUTHDB"
@@ -154,7 +163,6 @@ with st.expander('**3️⃣ 포메이션 입력**'):
 
                         cols_num = splited_formation[(horizon_cont_count)*(-1)]
                         placeholder_list = st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1]
-                        print(placeholder_list)
                         if cols_num in ['2','4']:
                             cols1, cols2, cols3, cols4 = st.columns(4)
                             if cols_num == '2':
@@ -285,7 +293,8 @@ with st.sidebar:
 
     
     
-    
+    fontRegistered()
+    plt.rc('font', family='NanumGothic')
     fig, ax = plt.subplots(figsize=(6, 8))
     # plt.gca().axes.xaxis.set_visible(False)
     # plt.gca().axes.yaxis.set_visible(False)
@@ -348,7 +357,8 @@ with st.sidebar:
     plt.scatter(10, 8)
     plt.scatter(14, 8)
     
-    plt.scatter(10, 4)
+    plt.scatter(10, 4,s=15**2)
+    plt.text(10-0.7, 4-0.7, '남태현')
 
     # 4-2-2-2
     fig4 = plt.figure(figsize=(6, 8))
