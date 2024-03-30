@@ -128,10 +128,10 @@ with st.expander('**3️⃣ 포메이션 입력**'):
     formation3 = st.selectbox('**3쿼터 포메이션**',eng_formation_list, key="formation3")
     formation4 = st.selectbox('**4쿼터 포메이션**',eng_formation_list, key="formation4")
     st.session_state['formation_info']['formation'] = {"1q": formation1, "2q": formation2, "3q": formation3, "4q": formation4}
-    st.session_state['formation_info']['1q'] = {}
-    st.session_state['formation_info']['2q'] = {}
-    st.session_state['formation_info']['3q'] = {}
-    st.session_state['formation_info']['4q'] = {}
+    # st.session_state['formation_info']['1q'] = {}
+    # st.session_state['formation_info']['2q'] = {}
+    # st.session_state['formation_info']['3q'] = {}
+    # st.session_state['formation_info']['4q'] = {}
     
     if "선택" not in list(st.session_state['formation_info']['formation'].values()):
         formation_list = list(st.session_state['formation_info']['formation'].values())
@@ -142,6 +142,7 @@ with st.expander('**3️⃣ 포메이션 입력**'):
             with tab:
                 con_dict[tab] = {}
                 splited_formation = formation_list[tdx].split("-")
+                st.session_state['formation_info'][f'{tdx+1}q'] = [[]]*len(splited_formation)
                 for horizon_cont_count in range(len(splited_formation)):
                     con_dict[tab]['formation'] = splited_formation
                     con_dict[tab][f'container{horizon_cont_count+1}'] = st.container(border=True)
@@ -150,13 +151,13 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                         if cols_num in ['2','4']:
                             cols1, cols2, cols3, cols4 = st.columns(4)
                             if cols_num == '2':
-                                cols2.write("222")
-                                cols3.write("333")
+                                cols2.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 1", label_visibility="collapsed")
+                                cols3.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 2", label_visibility="collapsed")
                             else:
-                                cols1.write("111")
-                                cols2.write("222")
-                                cols3.write("333")
-                                cols4.write("444")
+                                cols1.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 1", label_visibility="collapsed")
+                                cols2.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 2", label_visibility="collapsed")
+                                cols3.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 3", label_visibility="collapsed")
+                                cols4.multiselect('',entry_df['선수명'], key=f"selected_key : tab{tdx+1}, container{horizon_cont_count+1}, cols_num{cols_num}, 4", label_visibility="collapsed")
                         if cols_num in ['1','3','5']:
                             cols1, cols2, cols3, cols4, cols5 = st.columns(5)
                             if cols_num == '1':
@@ -171,7 +172,6 @@ with st.expander('**3️⃣ 포메이션 입력**'):
                                 cols3.write("333")
                                 cols4.write("444")
                                 cols3.write("555")
-                            
                         
                     
                 keep_container = st.container(border=True)
