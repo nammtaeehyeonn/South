@@ -25,10 +25,6 @@ if 'DB' not in st.session_state:
     print("Pinged your deployment. You successfully connected to MongoDB!")
     print("="*100)
     
-# local
-# with open("./all_entry.json", "r") as f:
-
-# github
 with open("./0330/all_entry.json", "r") as f:
     all_entry_dict = json.load(f)   
 all_players_list = list(all_entry_dict.keys())
@@ -71,7 +67,25 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
     if st.session_state['squad_info']['players']:
         entry_df = pd.DataFrame([{"선수명":p, "주포지션":all_entry_dict[p]["주포지션"], "부포지션":all_entry_dict[p]["부포지션"]} for p in players], index = [idx+1 for idx in range(len(players))])
         edited_entry_df = st.data_editor(entry_df, use_container_width=True)
-
+        
+        st.write("**스쿼드 분석**")
+        # st.write(f"공격수 : {(entry_df['주포지션'].str[-1] == 'F').sum()}")
+        # st.write(f"미드필더 :{(entry_df['주포지션'].str[-1] == 'M').sum()}")
+        # st.write(f"수비수: {(entry_df['주포지션'].str[-1] == 'B').sum()}")
+        # st.write(f"골키퍼 : {(entry_df['주포지션'].str[-1] == 'K').sum()}")
+        
+        main_pos_list = []
+        for i in ['GK', 'CB', 'CM', 'CF', 'GK_tmp','WB', 'WM', 'WF']:
+            if i == 'GK_tmp':
+                main_pos_list.append(0)    
+            else:
+                main_pos_list.append((entry_df['주포지션'] == i).sum())       
+        chart_data= pd.DataFrame(
+            {"position": ['골키퍼', '수비수', '미드필더', '공격수'], "중앙": main_pos_list[:4], "윙": main_pos_list[4:]}
+        )
+        st.bar_chart(
+        chart_data, x="position", y=["중앙", "윙"], color=["#FF0000", "#0000FF"]  # Optional
+        )
 
 
 with st.sidebar:
