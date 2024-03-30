@@ -242,50 +242,51 @@ with st.sidebar:
     # q3_display = st.session_state['formation_info']['3q']
     # q4_display = st.session_state['formation_info']['4q']
     
-    # if "선택" not in list(st.session_state['formation_info']['formation'].values()):
-    #     formation_list = list(st.session_state['formation_info']['formation'].values())
-    #     tab_list = ["1쿼터", "2쿼터", "3쿼터", "4쿼터"]
-    #     for tdx, tab in enumerate(tab_list):
-    #         st.write(tab)
-    #         marking_players = st.session_state['formation_info'][f'{tdx+1}q'][:]
-    #         splited_formation = formation_list[tdx].split("-")
-    #         for horizon_cont in range(len(splited_formation)):
-    #             horizon_cont_count = horizon_cont+1
-    #             cols_num = splited_formation[(horizon_cont_count)*(-1)]
-    #             if cols_num in ['2','4']:
-    #                 cols1, cols2, cols3, cols4 = st.columns(4)
-    #                 if cols_num == '2':
-    #                     if (splited_formation == ['4','2','2','2']) & ((horizon_cont_count)*(-1) == -2):
-    #                         cols_num2_1 = cols1.subheader(marking_players[0][0])
-    #                         cols_num2_2 = cols4.subheader(marking_players[0][1])
-    #                     else:
-    #                         cols_num2_1 = cols2.subheader(marking_players[0][0])
-    #                         cols_num2_2 = cols3.subheader(marking_players[0][1])
-    #                 else:
-    #                     cols_num4_1 = cols1.subheader(marking_players[0][0])
-    #                     cols_num4_2 = cols2.subheader(marking_players[0][1])
-    #                     cols_num4_3 = cols3.subheader(marking_players[0][2])
-    #                     cols_num4_4 = cols4.subheader(marking_players[0][3])
-    #             if cols_num in ['1','3','5']:
-    #                 cols1, cols2, cols3, cols4, cols5 = st.columns(5)
-    #                 if cols_num == '1':
-    #                     cols_num1_1 = cols3.subheader(marking_players[0][0])
-    #                 if cols_num == '3':
-    #                     cols_num3_1 = cols2.subheader(marking_players[0][0])
-    #                     cols_num3_2 = cols3.subheader(marking_players[0][1])
-    #                     cols_num3_3 = cols4.subheader(marking_players[0][2])
-    #                 if cols_num == '5':
-    #                     cols_num5_1 = cols1.subheader(marking_players[0][0])
-    #                     cols_num5_2 = cols2.subheader(marking_players[0][1])
-    #                     cols_num5_3 = cols3.subheader(marking_players[0][2])
-    #                     cols_num5_4 = cols4.subheader(marking_players[0][3])
-    #                     cols_num5_5 = cols5.subheader(marking_players[0][4])
+    if "선택" not in list(st.session_state['formation_info']['formation'].values()):
+        formation_list = list(st.session_state['formation_info']['formation'].values())
+        tab_list = ["1쿼터", "2쿼터", "3쿼터", "4쿼터"]
+        for tdx, tab in enumerate(tab_list):
+            st.write(tab)
+            marking_players = st.session_state['formation_info'][f'{tdx+1}q'][:]
+            splited_formation = formation_list[tdx].split("-")
+            for horizon_cont in range(len(splited_formation)):
+                horizon_cont_count = horizon_cont+1
+                cols_num = splited_formation[(horizon_cont_count)*(-1)]
+                if cols_num in ['2','4']:
+                    cols1, cols2, cols3, cols4 = st.columns(4)
+                    if cols_num == '2':
+                        if (splited_formation == ['4','2','2','2']) & ((horizon_cont_count)*(-1) == -2):
+                            cols_num2_1 = cols1.subheader(marking_players[0][0])
+                            cols_num2_2 = cols4.subheader(marking_players[0][1])
+                        else:
+                            cols_num2_1 = cols2.subheader(marking_players[0][0])
+                            cols_num2_2 = cols3.subheader(marking_players[0][1])
+                    else:
+                        cols_num4_1 = cols1.subheader(marking_players[0][0])
+                        cols_num4_2 = cols2.subheader(marking_players[0][1])
+                        cols_num4_3 = cols3.subheader(marking_players[0][2])
+                        cols_num4_4 = cols4.subheader(marking_players[0][3])
+                if cols_num in ['1','3','5']:
+                    cols1, cols2, cols3, cols4, cols5 = st.columns(5)
+                    if cols_num == '1':
+                        cols_num1_1 = cols3.subheader(marking_players[0][0])
+                    if cols_num == '3':
+                        cols_num3_1 = cols2.subheader(marking_players[0][0])
+                        cols_num3_2 = cols3.subheader(marking_players[0][1])
+                        cols_num3_3 = cols4.subheader(marking_players[0][2])
+                    if cols_num == '5':
+                        cols_num5_1 = cols1.subheader(marking_players[0][0])
+                        cols_num5_2 = cols2.subheader(marking_players[0][1])
+                        cols_num5_3 = cols3.subheader(marking_players[0][2])
+                        cols_num5_4 = cols4.subheader(marking_players[0][3])
+                        cols_num5_5 = cols5.subheader(marking_players[0][4])
 
-    #             marking_players.pop(0)
+                marking_players.pop(0)
 
 
-    #         cols1, cols2, cols3, cols4, cols5 = st.columns(5)
-    #         cols3.subheader(st.session_state['formation_info'][f'{tdx+1}q'][-1][0])
+            cols1, cols2, cols3, cols4, cols5 = st.columns(5)
+            gk_marking = st.session_state['formation_info'][f'{tdx+1}q'][-1]
+            cols3.subheader(gk_marking[0] if isinstance(gk_marking,list)  else gk_marking)
 
         
         
