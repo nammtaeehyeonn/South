@@ -292,109 +292,140 @@ with st.sidebar:
     #         cols3.subheader(gk_marking[0] if isinstance(gk_marking,list)  else gk_marking)
 
     
-    
+    # if "선택" not in list(st.session_state['formation_info']['formation'].values()):
     fontRegistered()
     plt.rc('font', family='NanumGothic')
+    
+    formation_list = list(st.session_state['formation_info']['formation'].values())
     fig, ax = plt.subplots(figsize=(6, 8))
     
-    # 4-3-3
-    fig1 = plt.figure(figsize=(6, 8))
-    plt.gca().axes.xaxis.set_visible(False)
-    plt.gca().axes.yaxis.set_visible(False)
-    plt.xlim(2, 18)
-    plt.ylim(2, 18)
-    
-    plt.scatter(6, 12)
-    plt.scatter(10, 12)
-    plt.scatter(14, 12)
-    
-    plt.scatter(6, 16)
-    plt.scatter(10, 16)
-    plt.scatter(14, 16)
-    
-    plt.scatter(4, 8)
-    plt.scatter(8, 8)
-    plt.scatter(12, 8)
-    plt.scatter(16, 8)
-    
-    plt.scatter(10, 4)
-
-    # 3-5-2
-    fig2 = plt.figure(figsize=(6, 8))
-    plt.gca().axes.xaxis.set_visible(False)
-    plt.gca().axes.yaxis.set_visible(False)
-    plt.xlim(2, 18)
-    plt.ylim(2, 18)
-    
-    plt.scatter(8, 16)
-    plt.scatter(12, 16)
-    
-    plt.scatter(4, 12)
-    plt.scatter(7, 12)
-    plt.scatter(10, 12)
-    plt.scatter(13, 12)
-    plt.scatter(16, 12)
-    
-    plt.scatter(6, 8)
-    plt.scatter(10, 8)
-    plt.scatter(14, 8)
-    
-    plt.scatter(10, 4)
-
-    # 3-4-3
-    fig3 = plt.figure(figsize=(6, 8))
-    plt.gca().axes.xaxis.set_visible(False)
-    plt.gca().axes.yaxis.set_visible(False)
-    plt.xlim(2, 18)
-    plt.ylim(2, 18)
-    
-    plt.scatter(6, 16)
-    plt.scatter(10, 16)
-    plt.scatter(14, 16)
-    
-    plt.scatter(4, 12)
-    plt.scatter(8, 12)
-    plt.scatter(12, 12)
-    plt.scatter(16, 12)
-    
-    plt.scatter(6, 8)
-    plt.scatter(10, 8)
-    plt.scatter(14, 8)
-    
-    plt.scatter(10, 4,s=30**2)
-    plt.text(10-0.6, 4-0.2, 'GK', fontdict={'size': 18})
-    plt.text(10-1.2, 4-1.2, '남태현', fontdict={'size': 18})
-
-    # 4-2-2-2
-    fig4 = plt.figure(figsize=(6, 8))
-    plt.gca().axes.xaxis.set_visible(False)
-    plt.gca().axes.yaxis.set_visible(False)
-    plt.xlim(2, 18)
-    plt.ylim(2, 18)
-    
-    plt.scatter(8, 16)
-    plt.scatter(12, 16)
-    
-    plt.scatter(4, 13)
-    plt.scatter(16, 13)   
-    
-    plt.scatter(8, 10)
-    plt.scatter(12, 10)
-    
-    plt.scatter(4, 7)
-    plt.scatter(8, 7)
-    plt.scatter(12, 7)
-    plt.scatter(16, 7)
-    
-    plt.scatter(10, 4)
-    
-    
-    st.pyplot(fig1)
-    st.pyplot(fig2)
-    st.pyplot(fig3)
-    st.pyplot(fig4)
+    graph_fig_dict = dict()
+    scatter_horizon_dict = {4 : [16,12,8,4], 5 : [16,13,10,7,4]} 
+    scatter_vertical_dict = {1 : [10], 2 : [8,12], 3 : [6,10,14], 4 : [4,8,12,16], 5 : [4,7,10,13,16]} 
+    for fdx, formation in enumerate(formation_list):
+        graph_fig_dict[f"fig{fdx+1}"] = plt.figure(figsize=(6, 8))
+        plt.gca().axes.xaxis.set_visible(False)
+        plt.gca().axes.yaxis.set_visible(False)
+        plt.xlim(2, 18)
+        plt.ylim(2, 18)
         
-     
+        scatter_dot = formation.split("-")[::-1] + ['1']
+        
+        horizon_coordinate = scatter_horizon_dict[len(scatter_dot)]
+        vertical_coordinate = [scatter_vertical_dict[int(i)] for i in scatter_dot]
+        if formation == '4-2-2-2':
+            vertical_coordinate[1] = [4,16]
+        
+        for hc, vc_list in zip(horizon_coordinate, vertical_coordinate):
+            for vc in vc_list:
+                plt.scatter(vc, hc,s=30**2)
+                plt.text(vc-0.6, hc-0.2, 'GK', fontdict={'size': 18})
+                plt.text(vc-1.2, hc-1.2, '남태현', fontdict={'size': 18})
+        print()
+    print("-"*100)
+        
+            
+    
+    
+    
+    # 4-3-3
+    # fig1 = plt.figure(figsize=(6, 8))
+    # plt.gca().axes.xaxis.set_visible(False)
+    # plt.gca().axes.yaxis.set_visible(False)
+    # plt.xlim(2, 18)
+    # plt.ylim(2, 18)
+    
+    # plt.scatter(6, 12)
+    # plt.scatter(10, 12)
+    # plt.scatter(14, 12)
+    
+    # plt.scatter(6, 16)
+    # plt.scatter(10, 16)
+    # plt.scatter(14, 16)
+    
+    # plt.scatter(4, 8)
+    # plt.scatter(8, 8)
+    # plt.scatter(12, 8)
+    # plt.scatter(16, 8)
+    
+    # plt.scatter(10, 4)
+
+    # # 3-5-2
+    # fig2 = plt.figure(figsize=(6, 8))
+    # plt.gca().axes.xaxis.set_visible(False)
+    # plt.gca().axes.yaxis.set_visible(False)
+    # plt.xlim(2, 18)
+    # plt.ylim(2, 18)
+    
+    # plt.scatter(8, 16)
+    # plt.scatter(12, 16)
+    
+    # plt.scatter(4, 12)
+    # plt.scatter(7, 12)
+    # plt.scatter(10, 12)
+    # plt.scatter(13, 12)
+    # plt.scatter(16, 12)
+    
+    # plt.scatter(6, 8)
+    # plt.scatter(10, 8)
+    # plt.scatter(14, 8)
+    
+    # plt.scatter(10, 4)
+
+    # # 3-4-3
+    # fig3 = plt.figure(figsize=(6, 8))
+    # plt.gca().axes.xaxis.set_visible(False)
+    # plt.gca().axes.yaxis.set_visible(False)
+    # plt.xlim(2, 18)
+    # plt.ylim(2, 18)
+    
+    # plt.scatter(6, 16)
+    # plt.scatter(10, 16)
+    # plt.scatter(14, 16)
+    
+    # plt.scatter(4, 12)
+    # plt.scatter(8, 12)
+    # plt.scatter(12, 12)
+    # plt.scatter(16, 12)
+    
+    # plt.scatter(6, 8)
+    # plt.scatter(10, 8)
+    # plt.scatter(14, 8)
+    
+    # plt.scatter(10, 4,s=30**2)
+    # plt.text(10-0.6, 4-0.2, 'GK', fontdict={'size': 18})
+    # plt.text(10-1.2, 4-1.2, '남태현', fontdict={'size': 18})
+
+    # # 4-2-2-2
+    # fig4 = plt.figure(figsize=(6, 8))
+    # plt.gca().axes.xaxis.set_visible(False)
+    # plt.gca().axes.yaxis.set_visible(False)
+    # plt.xlim(2, 18)
+    # plt.ylim(2, 18)
+    
+    # plt.scatter(8, 16)
+    # plt.scatter(12, 16)
+    
+    # plt.scatter(4, 13)
+    # plt.scatter(16, 13)   
+    
+    # plt.scatter(8, 10)
+    # plt.scatter(12, 10)
+    
+    # plt.scatter(4, 7)
+    # plt.scatter(8, 7)
+    # plt.scatter(12, 7)
+    # plt.scatter(16, 7)
+    
+    # plt.scatter(10, 4)
+    
+    
+    st.pyplot(graph_fig_dict['fig1'])
+    st.pyplot(graph_fig_dict['fig2'])
+    st.pyplot(graph_fig_dict['fig3'])
+    st.pyplot(graph_fig_dict['fig4'])
+        
+        
 
 
 
