@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 from PIL import Image
 import numpy as np
 import streamlit as st
@@ -146,7 +147,7 @@ if len(players) >= 11:
         
         if "선택" not in list(st.session_state['formation_info']['formation'].values()):
             formation_list = list(st.session_state['formation_info']['formation'].values())
-            tab1, tab2, tab3, tab4 = st.tabs(["1쿼터", "2쿼터", "3쿼터", "4쿼터"])
+            tab1, tab2, tab3, tab4 = st.tabs(["**▪1쿼터▪**", "**▪2쿼터▪**", "**▪3쿼터▪**", "**▪4쿼터▪**"])
             con_dict = {}
             for tdx, tab in enumerate([tab1, tab2, tab3, tab4]):
                 with tab:
@@ -294,14 +295,36 @@ with st.sidebar:
             graph_fig_dict = dict()
             scatter_horizon_dict = {4 : [16,12,8,4], 5 : [16,13,10,7,4]} 
             scatter_vertical_dict = {1 : [10], 2 : [8,12], 3 : [6,10,14], 4 : [4,8,12,16], 5 : [4,7,10,13,16]} 
-            color_dict = {4 : ['red','green','orange','yellow'], 5 : ['red','green','green','orange','yellow']} 
+            color_dict = {4 : ['red','#769bdb','orange','yellow'], 5 : ['red','#769bdb','#769bdb','orange','yellow']} 
             for fdx, formation in enumerate(formation_list):
-                graph_fig_dict[f"fig{fdx+1}"] = plt.figure(figsize=(6, 8))
+                graph_fig_dict[f"fig{fdx+1}"] = plt.figure(figsize=(7.5, 7.5))
+                plt.title(f"{fdx+1}쿼터\n", fontdict = {'fontsize': 16,'fontweight': 'bold'})
+                plt.axhspan(2, 4, color='#0ceb55', alpha=0.3)
+                plt.axhspan(4, 6, color='#0a5924', alpha=0.3)
+                plt.axhspan(6, 8, color='#0ceb55', alpha=0.3)
+                plt.axhspan(8, 10, color='#0a5924', alpha=0.3)
+                plt.axhspan(10, 12, color='#0ceb55', alpha=0.3)
+                plt.axhspan(12, 14, color='#0a5924', alpha=0.3)
+                plt.axhspan(14, 16, color='#0ceb55', alpha=0.3)
+                plt.axhspan(16, 18, color='#0a5924', alpha=0.3)
                 plt.gca().axes.xaxis.set_visible(False)
                 plt.gca().axes.yaxis.set_visible(False)
+                plt.gca().set_facecolor("#adc7b5")
                 plt.xlim(2, 18)
                 plt.ylim(2, 18)
-                    
+                plt.plot([2, 18], [10, 10], color='white', linewidth=2)
+                
+                plt.plot([8,8], [0,3], color='white', linewidth=2)
+                plt.plot([12,12], [0,3], color='white', linewidth=2)
+                plt.plot([8,12], [3,3], color='white', linewidth=2)
+                
+                plt.plot([8 ,8], [17,18], color='white', linewidth=2)
+                plt.plot([12 ,12], [17,18], color='white', linewidth=2)
+                plt.plot([8 ,12], [17,17], color='white', linewidth=2)
+                
+                circle = Circle((10, 10), 2, edgecolor='white', facecolor='none', linewidth=2)
+                plt.gcf().gca().add_artist(circle)
+                
                 marking_players = st.session_state['formation_info'][f'{fdx+1}q'][:]
                 
                 scatter_dot = formation.split("-")[::-1] + ['1']
@@ -313,10 +336,10 @@ with st.sidebar:
                 
                 for c, hc, vc_list, dt_list, mp_list in zip(color, horizon_coordinate, vertical_coordinate, dot_text_pos, marking_players):
                     for vc,dt,mp in zip(vc_list, dt_list, mp_list):
-                        plt.scatter(vc, hc,s=30**2, color=c)
-                        plt.text(vc, hc, dt, fontdict={'size': 14},  verticalalignment='center' , horizontalalignment='center')
+                        plt.scatter(vc, hc,s=30**2, color=c, alpha=1)
+                        plt.text(vc, hc, dt, fontdict={'size': 14},  verticalalignment='center' , horizontalalignment='center', alpha=1)
                         if not dt == mp:
-                            plt.text(vc, hc-1, mp, fontdict={'size': 18},  verticalalignment='center' , horizontalalignment='center')
+                            plt.text(vc, hc-1, mp, fontdict={'size': 18},  verticalalignment='center' , horizontalalignment='center', alpha=1)
             
             st.pyplot(graph_fig_dict['fig1'])
             st.pyplot(graph_fig_dict['fig2'])
