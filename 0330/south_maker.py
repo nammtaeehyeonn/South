@@ -77,16 +77,18 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
         chart_data= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": main_pos_list[:4], "윙": [0] + main_pos_list[4:]})
         st.bar_chart(chart_data, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"])
 
-        col1, col2 = st.columns(2)
-        for idx, col in enumerate([col1, col2, col1, col2]):
-            with col:
-                st.caption(f"{chart_data['포지션'][idx]}")
-                if idx == 0:
-                    mini_df = pd.DataFrame([main_pos_list[idx]], columns=['총원'])
-                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
-                else:
-                    mini_df = pd.DataFrame([[main_pos_list[idx]+main_pos_list[idx+3],main_pos_list[idx],main_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
-                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+        # col1, col2 = st.columns(2)
+        # for idx, col in enumerate([col1, col2, col1, col2]):
+        
+        # with col:
+        for idx in range(4):
+            st.caption(f"{chart_data['포지션'][idx]}")
+            if idx == 0:
+                mini_df = pd.DataFrame([main_pos_list[idx]], columns=['총원'])
+                edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+            else:
+                mini_df = pd.DataFrame([[main_pos_list[idx]+main_pos_list[idx+3],main_pos_list[idx],main_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
+                edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
 
 
 with st.sidebar:
