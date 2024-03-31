@@ -161,7 +161,7 @@ if len(players) >= 11:
         if "선택" not in list(st.session_state['formation_info']['formation'].values()):
             st.divider()
             st.write("**쿼터 수 분석**")
-            st.markdown('<span style="font-style:italic; font-size:15px;">* 주포지션을 기준으로 가장 공평하게 나눈 쿼터 수 입니다.</span>', unsafe_allow_html=True)
+            st.markdown('<span style="color:blue; font-style:italic; font-size:15px;">* 주포지션을 기준으로 가장 공평하게 나눈 쿼터 수 입니다.</span>', unsafe_allow_html=True)
             gk_count = (edited_entry_df_copy['주포지션'] == 'GK').sum()
             gk_quarter = 4 if gk_count == 0 else 4/gk_count
             except_gk_count = len(edited_entry_df_copy) - (edited_entry_df_copy['주포지션'] == 'GK').sum()
@@ -369,6 +369,8 @@ with st.sidebar:
                             height=int(35.2*(len(final_quarter_table)+1)))
             
             
+            st.divider()
+            st.subheader("FORMATION")
             
             
             
@@ -380,7 +382,7 @@ with st.sidebar:
             color_dict = {4 : ['red','#769bdb','orange','yellow'], 5 : ['red','#769bdb','#769bdb','orange','yellow']} 
             
             ground_gragh_list = [ground_gragh1, ground_gragh2, ground_gragh3, ground_gragh4] = \
-                [st.expander("**1쿼터**"), st.expander("**2쿼터**"), st.expander("**3쿼터**"), st.expander("**4쿼터**")]
+                [st.expander("**▪1쿼터▪**"), st.expander("**▪2쿼터▪**"), st.expander("**▪3쿼터▪**"), st.expander("**▪4쿼터▪**")]
             for fdx, formation in enumerate(formation_list):
                 with ground_gragh_list[fdx]:
                     graph_fig_dict[f"fig{fdx+1}"] = plt.figure(figsize=(7.5, 7.5))
