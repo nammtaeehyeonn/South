@@ -74,6 +74,9 @@ if 'duplicate_info' not in st.session_state:
     st.session_state['duplicate_info']['2q'] = []  
     st.session_state['duplicate_info']['3q'] = []  
     st.session_state['duplicate_info']['4q'] = []  
+if 'quarter_allocation_info' not in st.session_state:
+    st.session_state['quarter_allocation_info'] = {} 
+    st.session_state['quarter_allocation_info']['total'] = 0
 st.title("SOUTH_MAKER")
 
 
@@ -189,6 +192,58 @@ if len(players) >= 11:
                         col3.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
         
             st.write("")
+            
+            
+            
+            
+            
+            st.write("**쿼터 수 배정**")
+            # quarter_allocate_df = pd.concat([edited_entry_df_copy['선수명'], pd.Series([1]*len(edited_entry_df_copy['선수명']))], axis=1)
+            quarter_allocate_df = pd.concat([edited_entry_df_copy['선수명'], pd.DataFrame([0]*len(edited_entry_df_copy['선수명']))], axis=1)
+            quarter_allocate_df.columns = ['선수명', '배정 쿼터 수']
+            quarter_allocate_df.index = [idx+1 for idx in range(len(players))]
+
+            total_quarter_allocate_df = pd.DataFrame([["총합",0]], columns=['선수명', '배정 쿼터 수'])
+            final_quarter_allocate_table = pd.concat([total_quarter_allocate_df, quarter_allocate_df])
+            
+            
+            st_final_quarter_allocate_table = st.data_editor(final_quarter_allocate_table, use_container_width = True, 
+                           column_order = ('index', '선수명', '배정 쿼터 수'),
+                           height=int(35.2*(len(final_quarter_allocate_table)+1)),
+                           disabled=["선수명"],
+                           column_config={
+                            "배정 쿼터 수": st.column_config.NumberColumn(
+                                min_value=1,
+                                max_value=4,
+                                step=1,
+                             )
+                            }
+                           )
+            st.session_state['quarter_allocation_info']['total'] = st_final_quarter_allocate_table['배정 쿼터 수'].sum()
+            # st_final_quarter_allocate_table.iloc[0, 1] = st_final_quarter_allocate_table['배정 쿼터 수'].sum()
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             formation_list = list(st.session_state['formation_info']['formation'].values())
             tab1, tab2, tab3, tab4 = st.tabs(["**▪1쿼터▪**", "**▪2쿼터▪**", "**▪3쿼터▪**", "**▪4쿼터▪**"])
             con_dict = {}
@@ -212,13 +267,6 @@ if len(players) >= 11:
                             cols_num = splited_formation[(horizon_cont_count)*(-1)]
                             placeholder_list = st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1]
                             select_element_list = edited_entry_df_copy['선수명'] + ": " + edited_entry_df_copy['주포지션'] + "✅  " + edited_entry_df_copy['부포지션'] + "🔻"
-                            # unduplicated_select_element_list = select_element_list[~select_element_list.apply(lambda x: x.split(":")[0]).isin(duplicates_series)]
-                            # print(unduplicated_select_element_list)                            
-                            # print()
-                            
-                            
-                            # print(st.session_state['duplicate_info'])
-                            # if st.session_state['duplicate_info'][f'{tdx+1}q'] != []:
                             if cols_num in ['2','4']:
                                 cols1, cols2, cols3, cols4 = st.columns(4)
                                 if cols_num == '2':
@@ -346,28 +394,15 @@ if len(players) >= 11:
                     
 
                         
-                    # print(st.session_state['formation_info'][f'{tdx+1}q'])
-                    # print()
                     find_overlap_player_list = st.session_state['formation_info'][f'{tdx+1}q'][:]
-                    print(find_overlap_player_list)
                     find_overlap_player_list = [f for fopl in find_overlap_player_list for f in fopl]
-                    print(find_overlap_player_list)
                     find_overlap_player_list = [s for s in find_overlap_player_list if re.search(r'[\uAC00-\uD7A3]+', s)]
                     counts = Counter(find_overlap_player_list)
-                    print(find_overlap_player_list)
                     duplicates = [item for item, count in counts.items() if count > 1]
                     st.session_state['duplicate_info'][f'{tdx+1}q'] = duplicates
-                    print(st.session_state['duplicate_info'][f'{tdx+1}q'])
-                    
                     if len(duplicates) >0 :
                         st.error(f"**\*notice**\n\n중복되는 선수가 존재합니다. \n\n{'❌  '.join(duplicates)}❌  ")
                         
-                    # duplicates_series = pd.Series(st.session_state['duplicate_info'][f'{tdx+1}q'])
-                    # print(duplicates_series)
-                    print("="*100)
-            # print(duplicates_series)
-            print()
-            print()
     
 
 
@@ -475,8 +510,10 @@ with st.sidebar:
             # st.pyplot(graph_fig_dict['fig3'])
             # st.pyplot(graph_fig_dict['fig4'])
     else:
-        duplicate_problem_list = [f"{key[0]}쿼터" for key, value in st.session_state['duplicate_info'].items() if value != []]
-        st.error(f"**\*notice**\n\n스쿼드 인원 수 혹은 {', '.join(duplicate_problem_list)}에 중복 인원이 존재합니다.")            
+        # st.write(len(players))
+        if len(players) >= 11:
+            duplicate_problem_list = [f"{key[0]}쿼터" for key, value in st.session_state['duplicate_info'].items() if value != []]
+            st.error(f"**\*notice**\n\n스쿼드 인원 수 혹은 {', '.join(duplicate_problem_list)}에 중복 인원이 존재합니다.")            
                 
 
 
