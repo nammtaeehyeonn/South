@@ -77,6 +77,8 @@ if 'duplicate_info' not in st.session_state:
 if 'quarter_allocation_info' not in st.session_state:
     st.session_state['quarter_allocation_info'] = {} 
     st.session_state['quarter_allocation_info']['total'] = 0
+    st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = False
+    st.session_state['quarter_allocation_info']['stop_player_name_list'] = []
 st.title("SOUTH_MAKER")
 
 
@@ -234,7 +236,19 @@ if len(players) >= 11:
             if allocated_quarters_num > 44:
                 st.error("쿼터 수를 초과했습니다.")
                 
-                
+#######################################################################################################################################
+# 0331 쿼터 다 찬 사람 해결 못함                
+            # final_quarter_allocate_table_copy = copy.deepcopy(final_quarter_allocate_table)
+            # if st.session_state['quarter_allocation_info']['stop_player_name_list_bool']:
+            #     b = st.session_state['quarter_allocation_info']['stop_player_name_list']
+                # final_quarter_allocate_table_copy_name_list = final_quarter_allocate_table_copy['선수명']
+                # print(final_quarter_allocate_table_copy_name_list)
+                # for i in b:
+                    # print(final_quarter_allocate_table_copy.loc[final_quarter_allocate_table_copy['선수명'] == i, '선수명'])
+                    # final_quarter_allocate_table_copy.loc[final_quarter_allocate_table_copy['선수명'] == i, '선수명'] = "XXX"
+                    
+            # print(final_quarter_allocate_table_copy)
+#######################################################################################################################################
             if allocated_quarters_num == 44:
                 for tdx, tab in enumerate([tab1, tab2, tab3, tab4]):
                     with tab:
@@ -254,6 +268,14 @@ if len(players) >= 11:
                                 cols_num = splited_formation[(horizon_cont_count)*(-1)]
                                 placeholder_list = st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1]
                                 select_element_list = edited_entry_df_copy['선수명'] + ": " + edited_entry_df_copy['주포지션'] + "✅  " + edited_entry_df_copy['부포지션'] + "🔻"
+                                # select_element_list = edited_entry_df_copy['선수명']
+                                # print(select_element_list)
+                                # if st.session_state['quarter_allocation_info']['stop_player_name_list_bool']:
+                                #     select_element_list.replace('김동선', "X")
+                                    # b = st.session_state['quarter_allocation_info']['stop_player_name_list']
+                                    # select_element_list = select_element_list[~select_element_list.apply(lambda x: x.split(":")[0]).isin(b)]
+                                # print(select_element_list)
+                                    
                                 if cols_num in ['2','4']:
                                     cols1, cols2, cols3, cols4 = st.columns(4)
                                     if cols_num == '2':
@@ -405,9 +427,9 @@ if len(players) >= 11:
 
 with st.sidebar:
     finally_no_errors = False
-    # st.write(st.session_state['game_info'])
-    # st.write(st.session_state['squad_info'])
-    # st.write(st.session_state['formation_info'])
+    st.write(st.session_state['game_info'])
+    st.write(st.session_state['squad_info'])
+    st.write(st.session_state['formation_info'])
     # st.write(st.session_state['duplicate_info'])
     
     
@@ -446,6 +468,8 @@ with st.sidebar:
                 
                 total_df = pd.DataFrame([["총합",t_quarter, str(t_1q), str(t_2q), str(t_3q), str(t_4q)]], columns=["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"])
                 final_quarter_table = pd.concat([total_df, quarter_table])
+                slash_quarters = pd.concat([pd.Series(['44']), final_quarter_allocate_table.loc[:, '배정 쿼터 수'].astype('str')]).reset_index(drop=True)
+                final_quarter_table.loc[:, '남은 쿼터 수'] = final_quarter_table.loc[:, '남은 쿼터 수'].astype('str') + '/'+  slash_quarters
                 
                 st.dataframe(final_quarter_table, use_container_width=True, 
                             column_order= ("index", "이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"), 
@@ -514,6 +538,8 @@ with st.sidebar:
                     st.pyplot(graph_fig_dict[f"fig{fdx+1}"])
                     
         finally_no_errors = True
+        
+        
     else:
         if len(players) >= 11:
             if (allocated_quarters_num == 44):
@@ -521,23 +547,26 @@ with st.sidebar:
                 st.error(f"**\*notice**\n\n{', '.join(duplicate_problem_list)}에 중복 인원이 존재합니다.")            
                 
 
-
+# st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = False
 if finally_no_errors:
-    # st.write("@!#@!#@!#@!#!@#!@#!@#@!")
-    # st.dataframe(final_quarter_table.iloc[1:,:2])
-    # print(find_stop_select[find_stop_select['남은 쿼터 수'] == 0]['이름'].values)
+    find_stop_select = final_quarter_table.iloc[1:,:2]
+    over_quarter_alloncated = find_stop_select[find_stop_select['남은 쿼터 수'].apply(lambda x: int(x.split("/")[0])) < 0]
     
-    with expander3:
-        find_stop_select = final_quarter_table.iloc[1:,:2]
-        stop_player = "🔸"+find_stop_select[find_stop_select['남은 쿼터 수'] == 0]['이름'].values+"🔸"
-        st.success(f"**\*notice**\n\n{'     '.join(stop_player)}의 쿼터 배정이 끝났습니다. \n\n자세한 사항은 좌측 사이드 바에서 확인하세요.")
+    stop_player_name_list = find_stop_select[find_stop_select['남은 쿼터 수'].apply(lambda x: x.split("/")[0]) == "0"]['이름'].values
+    stop_player = "🔸"+stop_player_name_list+"🔸"
+    
+    if len(stop_player)> 0:
+        with expander3:
+            st.success(f"**\*notice**\n\n{'     '.join(stop_player)}의 쿼터 배정이 끝났습니다. \n\n자세한 사항은 좌측 사이드 바에서 확인하세요.")
+            st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = True
+            st.session_state['quarter_allocation_info']['stop_player_name_list'] = stop_player_name_list
+            print(st.session_state['quarter_allocation_info']['stop_player_name_list_bool'])
+            print(st.session_state['quarter_allocation_info']['stop_player_name_list'])
+    else:
+        st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = False
 
 
-
-
-
-
-
+############쿼터 다 찬 사람 해결 못함
 
 
 
