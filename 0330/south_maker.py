@@ -427,9 +427,9 @@ if len(players) >= 11:
 
 with st.sidebar:
     finally_no_errors = False
-    st.write(st.session_state['game_info'])
-    st.write(st.session_state['squad_info'])
-    st.write(st.session_state['formation_info'])
+    # st.write(st.session_state['game_info'])
+    # st.write(st.session_state['squad_info'])
+    # st.write(st.session_state['formation_info'])
     # st.write(st.session_state['duplicate_info'])
     
     
