@@ -109,7 +109,10 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
         gk_quarter = 4 if gk_count == 0 else 4/gk_count
         except_gk_count = len(entry_df) - (entry_df['주포지션'] == 'GK').sum()
         except_gk_quarter = 44 if gk_count == 0 else 40
-        
+           
+           
+           
+           
         if gk_count > 0:
             col1, col2, col3, col4 = st.columns(4)
             col1.metric("전체인원", f"총 {len(entry_df)}명", "")
