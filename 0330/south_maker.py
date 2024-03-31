@@ -313,19 +313,16 @@ with st.sidebar:
             for fdx, formation in enumerate(formation_list):
                 graph_fig_dict[f"fig{fdx+1}"] = plt.figure(figsize=(7.5, 7.5))
                 plt.title(f"{fdx+1}쿼터\n", fontdict = {'fontsize': 16,'fontweight': 'bold'})
-                plt.axhspan(2, 4, color='#0ceb55', alpha=0.3)
-                plt.axhspan(4, 6, color='#0a5924', alpha=0.3)
-                plt.axhspan(6, 8, color='#0ceb55', alpha=0.3)
-                plt.axhspan(8, 10, color='#0a5924', alpha=0.3)
-                plt.axhspan(10, 12, color='#0ceb55', alpha=0.3)
-                plt.axhspan(12, 14, color='#0a5924', alpha=0.3)
-                plt.axhspan(14, 16, color='#0ceb55', alpha=0.3)
-                plt.axhspan(16, 18, color='#0a5924', alpha=0.3)
                 plt.gca().axes.xaxis.set_visible(False)
                 plt.gca().axes.yaxis.set_visible(False)
                 plt.gca().set_facecolor("#adc7b5")
                 plt.xlim(2, 18)
                 plt.ylim(2, 18)
+                
+                for i in range(2,17,2):
+                    grass_color = "#0ceb55" if i%4 == 0 else "#0a5924"
+                    plt.axhspan(i, i+2, color=grass_color, alpha=0.3) 
+                           
                 plt.plot([2, 18], [10, 10], color='white', linewidth=2)
                 
                 plt.plot([8,8], [0,3], color='white', linewidth=2)
