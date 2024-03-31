@@ -475,7 +475,8 @@ with st.sidebar:
             # st.pyplot(graph_fig_dict['fig3'])
             # st.pyplot(graph_fig_dict['fig4'])
     else:
-        st.error(f"**\*notice**\n\n스쿼드 인원 수 혹은 포메이션에 중복 인원이 존재합니다.")            
+        duplicate_problem_list = [f"{key[0]}쿼터" for key, value in st.session_state['duplicate_info'].items() if value != []]
+        st.error(f"**\*notice**\n\n스쿼드 인원 수 혹은 {', '.join(duplicate_problem_list)}에 중복 인원이 존재합니다.")            
                 
 
 
