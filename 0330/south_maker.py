@@ -367,6 +367,9 @@ with st.sidebar:
                             height=int(35.2*(len(final_quarter_table)+1)))
             
             
+            
+            
+            
             fig, ax = plt.subplots(figsize=(6, 8))
             
             graph_fig_dict = dict()
