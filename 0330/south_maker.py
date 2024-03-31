@@ -105,15 +105,28 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
             main_pos_list.append((entry_df['주포지션'] == i).sum()) 
             sub_pos_list.append((find_sub_pos_series.apply(lambda x : i in x)).sum())
             
+        gk_count = (entry_df['주포지션'] == 'GK').sum()
+        gk_quarter = 4 if gk_count == 0 else 4/gk_count
+        except_gk_count = len(entry_df) - (entry_df['주포지션'] == 'GK').sum()
+        except_gk_quarter = 44 if gk_count == 0 else 40
         
-        
+        if gk_count > 0:
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("전체인원", f"총 {len(entry_df)}명", "")
+            col2.metric("골키퍼", f"{gk_count}명", f"{int(gk_quarter)}쿼터")
+            col3.metric("", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+            col4.metric("", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
+        else:
+            col1, col2, col3 = st.columns(3)
+            col1.metric("전체인원", f"총 {len(entry_df)}명", f"골키퍼:{gk_count}명")
+            col2.metric("", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+            if int(except_gk_quarter/except_gk_count) != 4:
+                col3.metric("", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
         
         tab1, tab2 = st.tabs(["**▪주포지션▪**", "**▪부포지션 포함▪**"])
-
         with tab1:
             chart_data_tab1= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": main_pos_list[:4], "윙": [0] + main_pos_list[4:]})
             st.bar_chart(chart_data_tab1, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"])
-            st.write(f"전체인원 : {len(entry_df)}명")
             for idx in range(4):
                 st.caption(f"{chart_data_tab1['포지션'][idx]}")
                 if idx == 0:
@@ -126,7 +139,6 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
         with tab2:
             chart_data_tab2= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": sub_pos_list[:4], "윙": [0] + sub_pos_list[4:]})
             st.bar_chart(chart_data_tab2, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"])
-            st.write(f"전체인원 : {len(entry_df)}명")
             for idx in range(4):
                 st.caption(f"{chart_data_tab1['포지션'][idx]}")
                 if idx == 0:
@@ -136,16 +148,9 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
                     mini_df = pd.DataFrame([[sub_pos_list[idx]+sub_pos_list[idx+3],sub_pos_list[idx],sub_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
                     edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
 
-        st.write("공평한 분배(주포지션기준)")
         
-        gk_count = (entry_df['주포지션'] == 'GK').sum()
-        gk_quarter = 4 if gk_count == 0 else 4/gk_count
-        st.write(f"키퍼 {gk_count}명 => {gk_quarter}쿼터")
         
-        except_gk_count = len(entry_df) - (entry_df['주포지션'] == 'GK').sum()
-        except_gk_quarter = 44 if gk_count == 0 else 40
-        st.write(f"나머지 {except_gk_count}명 => {except_gk_count- int(except_gk_quarter%except_gk_count)}명, {int(except_gk_quarter/except_gk_count)}쿼터\
-                 // {int(except_gk_quarter%except_gk_count)}명, {int(except_gk_quarter/except_gk_count)+1}쿼터")
+        
 
 
 if len(players) >= 11:
