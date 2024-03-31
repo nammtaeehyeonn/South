@@ -161,6 +161,7 @@ if len(players) >= 11:
         if "선택" not in list(st.session_state['formation_info']['formation'].values()):
             st.divider()
             st.write("**쿼터 수 분석**")
+            st.markdown('<span style="font-style:italic; font-size:15px;">* 주포지션을 기준으로 가장 공평하게 나눈 쿼터 수 입니다.</span>', unsafe_allow_html=True)
             gk_count = (edited_entry_df_copy['주포지션'] == 'GK').sum()
             gk_quarter = 4 if gk_count == 0 else 4/gk_count
             except_gk_count = len(edited_entry_df_copy) - (edited_entry_df_copy['주포지션'] == 'GK').sum()
@@ -460,15 +461,15 @@ with st.sidebar:
 
 
     
-# if st.button('깃허브에 커밋 & 푸시하기'):
-#     # 현재 시간을 커밋 메시지로 사용합니다.
-#     commit_message = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+if st.button('깃허브에 커밋 & 푸시하기'):
+    # 현재 시간을 커밋 메시지로 사용합니다.
+    commit_message = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-#     try:
-#         subprocess.run(["git", "add", "."], check=True, stderr=subprocess.PIPE)
-#         subprocess.run(["git", "commit", "-m", commit_message], check=True, stderr=subprocess.PIPE)
-#         subprocess.run(["git", "push"], check=True, stderr=subprocess.PIPE)
-#         st.success('깃허브에 성공적으로 커밋 & 푸시되었습니다.')
-#     except subprocess.CalledProcessError as e:
-#         st.error(f'명령어 실행 중 오류가 발생했습니다: {e}')
+    try:
+        subprocess.run(["git", "add", "."], check=True, stderr=subprocess.PIPE)
+        subprocess.run(["git", "commit", "-m", commit_message], check=True, stderr=subprocess.PIPE)
+        subprocess.run(["git", "push"], check=True, stderr=subprocess.PIPE)
+        st.success('깃허브에 성공적으로 커밋 & 푸시되었습니다.')
+    except subprocess.CalledProcessError as e:
+        st.error(f'명령어 실행 중 오류가 발생했습니다: {e}')
 
