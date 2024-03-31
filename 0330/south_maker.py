@@ -145,7 +145,8 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
         
         
         
-
+if (len(players) > 0) and (len(players) < 11):
+    st.info("**\*notice**\n\n아직 스쿼드가 11명이 되지않았습니다. \n\n최소 11명이 되어야 다음 단계 진행이 가능합니다.")
 
 if len(players) >= 11:
     with st.expander('**3️⃣ 포메이션 입력**'):
