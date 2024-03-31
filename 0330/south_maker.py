@@ -359,7 +359,10 @@ with st.sidebar:
             total_df = pd.DataFrame([["총합",t_quarter, t_1q, t_2q, t_3q, t_4q]], columns=["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"])
             final_quarter_table = pd.concat([total_df, quarter_table])
             
-            st.dataframe(final_quarter_table, use_container_width=True, column_order= ("index", "이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"), height=int(35.2*(len(final_quarter_table)+1))) # 한 라인당 54
+            st.dataframe(final_quarter_table, use_container_width=True, 
+                         column_order= ("index", "이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"), 
+                         hide_index = True,
+                         height=int(35.2*(len(final_quarter_table)+1))) # 한 라인당 54
             
             
             fig, ax = plt.subplots(figsize=(6, 8))
