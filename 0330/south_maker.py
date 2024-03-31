@@ -17,6 +17,8 @@ import copy
 
 from pymongo.mongo_client import MongoClient
 
+st.set_page_config(layout="wide")
+
 @st.cache_data
 def fontRegistered():
     font_dirs = [os.getcwd() + '/customFonts']
@@ -26,7 +28,8 @@ def fontRegistered():
         fm.fontManager.addfont(font_file)
     fm._load_fontmanager(try_read_cache=False)
     
-st.set_page_config(layout="wide")
+fontRegistered()
+plt.rc('font', family='NanumGothic')
 
 uri = "mongodb+srv://skaxogusdl:skaclxo661@southdb.h5j75si.mongodb.net/?retryWrites=true&w=majority&appName=SOUTHDB"
 client = MongoClient(uri)
@@ -333,10 +336,8 @@ with st.sidebar:
     st.write(st.session_state['formation_info'])
     
     if (len(players) >= 11):
-        fontRegistered()
-        plt.rc('font', family='NanumGothic')
-        
         formation_list = list(st.session_state['formation_info']['formation'].values())
+        
         if '선택' not in formation_list:
             real_name_series = select_element_list.apply(lambda x: x.split(":")[0])
             quarter_table = pd.concat([real_name_series,pd.DataFrame([[0,"","","",""]]*len(select_element_list))], axis = 1)
