@@ -92,8 +92,15 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
     st.session_state['squad_info']['players'] = players
     entry_df = pd.DataFrame()
     if st.session_state['squad_info']['players']:
-        entry_df = pd.DataFrame([{"선수명":p, "주포지션":all_entry_dict[p]["주포지션"], "부포지션":all_entry_dict[p]["부포지션"]} for p in players], index = [idx+1 for idx in range(len(players))])
-        edited_entry_df = st.data_editor(entry_df, use_container_width=True)
+        entry_df = pd.DataFrame([{"선수명":p, "쿼터 수":0, "주포지션":all_entry_dict[p]["주포지션"], "부포지션":all_entry_dict[p]["부포지션"]} for p in players], index = [idx+1 for idx in range(len(players))])
+        edited_entry_df = st.data_editor(entry_df, use_container_width=True,
+                                         column_config={
+                                            "쿼터 수": st.column_config.NumberColumn(
+                                                min_value=1,
+                                                max_value=4,
+                                                step=1,
+                                            )},
+                                         )
         find_sub_pos_series = entry_df['주포지션'] + ","+ entry_df['부포지션'].apply(lambda x : ",".join(x))
         
         st.write("")
@@ -110,21 +117,18 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
         except_gk_count = len(entry_df) - (entry_df['주포지션'] == 'GK').sum()
         except_gk_quarter = 44 if gk_count == 0 else 40
            
-           
-           
-           
         if gk_count > 0:
             col1, col2, col3, col4 = st.columns(4)
             col1.metric("전체인원", f"총 {len(entry_df)}명", "")
             col2.metric("골키퍼", f"{gk_count}명", f"{int(gk_quarter)}쿼터")
-            col3.metric("", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
-            col4.metric("", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
+            col3.metric(" ", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+            col4.metric(" ", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
         else:
             col1, col2, col3 = st.columns(3)
             col1.metric("전체인원", f"총 {len(entry_df)}명", f"골키퍼:{gk_count}명")
-            col2.metric("", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+            col2.metric(" ", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
             if int(except_gk_quarter/except_gk_count) != 4:
-                col3.metric("", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
+                col3.metric(" ", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
         
         tab1, tab2 = st.tabs(["**▪주포지션▪**", "**▪부포지션 포함▪**"])
         with tab1:
