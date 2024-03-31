@@ -172,7 +172,7 @@ if len(players) >= 11:
         formation4 = st.selectbox('**4쿼터 포메이션**',eng_formation_list, key="formation4")
         st.session_state['formation_info']['formation'] = {"1q": formation1, "2q": formation2, "3q": formation3, "4q": formation4}
         edited_entry_df_copy = pd.DataFrame(st.session_state['squad_info']['players'])
-        
+        allocated_quarters_num = 0
         if "선택" not in list(st.session_state['formation_info']['formation'].values()):
             st.divider()
             st.write("**쿼터 수 분석**")
