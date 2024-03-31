@@ -101,7 +101,7 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
                                             ), 
                                             "부포지션": st.column_config.TextColumn(
                                                 validate='^(GK|CB|WB|CM|WM|CF|WF)(,(GK|CB|WB|CM|WM|CF|WF))*$'
-                                            )})
+                                            )}, height=int(35.2*(len(entry_df)+1)))
         find_sub_pos_series = edited_entry_df['주포지션'] + ","+ edited_entry_df['부포지션']
         st.session_state['squad_info']['players'] = json.loads(edited_entry_df.to_json(orient='records'))
         st.write("")
@@ -336,6 +336,7 @@ with st.sidebar:
     real_name_series = select_element_list.apply(lambda x: x.split(":")[0])
     quarter_table = pd.concat([real_name_series,pd.DataFrame([[0,"","","",""]]*len(select_element_list))], axis = 1)
     quarter_table.columns = ["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"]
+    quarter_table.index = [idx+1 for idx in range(len(players))]
     
     f_dict = copy.deepcopy(st.session_state['formation_info'])
     
@@ -351,10 +352,17 @@ with st.sidebar:
                 # print(name, f"{qdx+1}Q", origin_position_list[ndx])
                 quarter_table.loc[quarter_table['이름'] == name, f"{qdx+1}Q"] = origin_position_list[ndx]
                 quarter_table.loc[:, '쿼터 수'] = (quarter_table.loc[:, ['1Q','2Q','3Q','4Q']] != "").sum(axis = 1)
-                
     
-    st.dataframe(quarter_table, use_container_width=True)
+    t_quarter = quarter_table['쿼터 수'].sum()
+    t_1q = (quarter_table['1Q'] != "").sum()
+    t_2q = (quarter_table['2Q'] != "").sum()
+    t_3q = (quarter_table['3Q'] != "").sum()
+    t_4q = (quarter_table['4Q'] != "").sum()
     
+    total_df = pd.DataFrame([["총합",t_quarter, t_1q, t_2q, t_3q, t_4q]], columns=["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"])
+    final_quarter_table = pd.concat([total_df, quarter_table])
+    
+    st.dataframe(final_quarter_table, use_container_width=True, column_order= ("index", "이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"), height=int(35.2*(len(final_quarter_table)+1))) # 한 라인당 54
     
     if (len(players) >= 11):
         fontRegistered()
