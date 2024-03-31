@@ -328,10 +328,33 @@ if len(players) >= 11:
 
 
 with st.sidebar:
-    st.write(st.session_state['game_info'])
-    st.write(st.session_state['squad_info'])
+    # st.write(st.session_state['game_info'])
+    # st.write(st.session_state['squad_info'])
     st.write(st.session_state['formation_info'])
-
+    
+    # index = [idx+1 for idx in range(len(players))]
+    real_name_series = select_element_list.apply(lambda x: x.split(":")[0])
+    quarter_table = pd.concat([real_name_series,pd.DataFrame([[0,"","","",""]]*len(select_element_list))], axis = 1)
+    quarter_table.columns = ["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"]
+    
+    f_dict = copy.deepcopy(st.session_state['formation_info'])
+    
+    for qdx, quarter in enumerate(f_dict['formation']):
+        # print(f_dict['formation'][quarter])
+        # print(for_dot_position[f_dict['formation'][quarter]][::-1] + [['GK']])
+        origin_position_list = [minis for mini_list in for_dot_position[f_dict['formation'][quarter]][::-1] + [['GK']] for minis in mini_list]
+        include_chk_list = [minis for mini_list in f_dict[quarter] for minis in mini_list]
+        # print(origin_position_list)
+        # print(include_chk_list)
+        for ndx, name in enumerate(include_chk_list):
+            if name in real_name_series.values:
+                # print(name, f"{qdx+1}Q", origin_position_list[ndx])
+                quarter_table.loc[quarter_table['이름'] == name, f"{qdx+1}Q"] = origin_position_list[ndx]
+                quarter_table.loc[:, '쿼터 수'] = (quarter_table.loc[:, ['1Q','2Q','3Q','4Q']] != "").sum(axis = 1)
+                
+    
+    st.dataframe(quarter_table, use_container_width=True)
+    
     
     if (len(players) >= 11):
         fontRegistered()
