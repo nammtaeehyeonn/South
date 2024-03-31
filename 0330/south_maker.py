@@ -167,15 +167,15 @@ if len(players) >= 11:
                     col1, col2, col3, col4 = st.columns(4)
                     col1.metric("전체인원", f"총 {len(edited_entry_df_copy)}명", "")
                     col2.metric("골키퍼", f"{gk_count}명", f"{int(gk_quarter)}쿼터")
-                    col3.metric(" ", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+                    col3.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
                     if int(except_gk_quarter/except_gk_count) != 4:
-                        col4.metric(" ", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
+                        col4.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
                 else:
                     col1, col2, col3 = st.columns(3)
                     col1.metric("전체인원", f"총 {len(edited_entry_df_copy)}명", f"골키퍼:{gk_count}명")
-                    col2.metric(" ", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+                    col2.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
                     if int(except_gk_quarter/except_gk_count) != 4:
-                        col3.metric(" ", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
+                        col3.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
         
             st.write("")
             formation_list = list(st.session_state['formation_info']['formation'].values())
