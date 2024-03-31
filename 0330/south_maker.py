@@ -203,14 +203,15 @@ if len(players) >= 11:
             quarter_allocate_df.columns = ['선수명', '배정 쿼터 수']
             quarter_allocate_df.index = [idx+1 for idx in range(len(players))]
 
-            total_quarter_allocate_df = pd.DataFrame([["총합",0]], columns=['선수명', '배정 쿼터 수'])
-            final_quarter_allocate_table = pd.concat([total_quarter_allocate_df, quarter_allocate_df])
+            # total_quarter_allocate_df = pd.DataFrame([["총합",0]], columns=['선수명', '배정 쿼터 수'])
+            # final_quarter_allocate_table = pd.concat([total_quarter_allocate_df, quarter_allocate_df])
             
             
-            st_final_quarter_allocate_table = st.data_editor(final_quarter_allocate_table, use_container_width = True, 
+            final_quarter_allocate_table = st.data_editor(quarter_allocate_df, use_container_width = True, 
                            column_order = ('index', '선수명', '배정 쿼터 수'),
-                           height=int(35.2*(len(final_quarter_allocate_table)+1)),
+                           height=int(35.2*(len(quarter_allocate_df)+1)),
                            disabled=["선수명"],
+                           hide_index=True,
                            column_config={
                             "배정 쿼터 수": st.column_config.NumberColumn(
                                 min_value=1,
@@ -219,28 +220,23 @@ if len(players) >= 11:
                              )
                             }
                            )
-            st.session_state['quarter_allocation_info']['total'] = st_final_quarter_allocate_table['배정 쿼터 수'].sum()
-            # st_final_quarter_allocate_table.iloc[0, 1] = st_final_quarter_allocate_table['배정 쿼터 수'].sum()
+            
+            allocated_quarters_num = final_quarter_allocate_table['배정 쿼터 수'].sum()
+            allocated_quarters_players = (final_quarter_allocate_table['배정 쿼터 수'] != 0).sum()
+            quarters_for_metric = list(final_quarter_allocate_table['배정 쿼터 수'].unique())
+            quarters_for_metric.sort()
+            if 0 in quarters_for_metric: quarters_for_metric.remove(0)
+            
+            columns = st.columns(len(quarters_for_metric)+1)
             
             
             
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
-            
+            print((final_quarter_allocate_table['배정 쿼터 수'] == 4).sum())
+            # if len(columns) == 2:
+            columns[0].metric(label="현재 배정된 쿼터 수", value=f"{allocated_quarters_num}/44", delta=f"{allocated_quarters_players}명")
+            for col,qfm in zip(columns[1:], quarters_for_metric):
+                quarter_play = (final_quarter_allocate_table['배정 쿼터 수'] == qfm).sum()
+                col.metric(label=f"{qfm}쿼터", value=f"{quarter_play}명", delta=f"{qfm}쿼터")
             
             
             
@@ -248,161 +244,162 @@ if len(players) >= 11:
             tab1, tab2, tab3, tab4 = st.tabs(["**▪1쿼터▪**", "**▪2쿼터▪**", "**▪3쿼터▪**", "**▪4쿼터▪**"])
             con_dict = {}
             
-            for tdx, tab in enumerate([tab1, tab2, tab3, tab4]):
-                with tab:
-                    con_dict[tab] = {}
-                    splited_formation = formation_list[tdx].split("-")
-                    st.session_state['formation_info'][f'{tdx+1}q'] = eng_formation_dict[formation_list[tdx]][::-1] + [["GK"]]
-                    
+            if allocated_quarters_num == 44:
+                for tdx, tab in enumerate([tab1, tab2, tab3, tab4]):
+                    with tab:
+                        con_dict[tab] = {}
+                        splited_formation = formation_list[tdx].split("-")
+                        st.session_state['formation_info'][f'{tdx+1}q'] = eng_formation_dict[formation_list[tdx]][::-1] + [["GK"]]
+                        
 
-                    for horizon_cont in range(len(splited_formation)):
-                        horizon_cont_count = horizon_cont+1
-                        con_dict[tab]['formation'] = splited_formation
-                        con_dict[tab][f'container{horizon_cont_count}'] = st.container(border=True)
-                        with con_dict[tab][f'container{horizon_cont_count}']:
-                            markdown_formation = splited_formation[::-1]
-                            markdown_formation[horizon_cont_count-1] = f'<span style="color:blue; font-weight:bold; font-size:25px;">{markdown_formation[horizon_cont_count-1]}</span>'
-                            st.markdown(f'**{"-".join(markdown_formation[::-1])}**', unsafe_allow_html=True)
+                        for horizon_cont in range(len(splited_formation)):
+                            horizon_cont_count = horizon_cont+1
+                            con_dict[tab]['formation'] = splited_formation
+                            con_dict[tab][f'container{horizon_cont_count}'] = st.container(border=True)
+                            with con_dict[tab][f'container{horizon_cont_count}']:
+                                markdown_formation = splited_formation[::-1]
+                                markdown_formation[horizon_cont_count-1] = f'<span style="color:blue; font-weight:bold; font-size:25px;">{markdown_formation[horizon_cont_count-1]}</span>'
+                                st.markdown(f'**{"-".join(markdown_formation[::-1])}**', unsafe_allow_html=True)
 
-                            cols_num = splited_formation[(horizon_cont_count)*(-1)]
-                            placeholder_list = st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1]
-                            select_element_list = edited_entry_df_copy['선수명'] + ": " + edited_entry_df_copy['주포지션'] + "✅  " + edited_entry_df_copy['부포지션'] + "🔻"
-                            if cols_num in ['2','4']:
-                                cols1, cols2, cols3, cols4 = st.columns(4)
-                                if cols_num == '2':
-                                    if (splited_formation == ['4','2','2','2']) & ((horizon_cont_count)*(-1) == -2):
-                                        cols_num2_1 = cols1.selectbox('tmp', select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
-                                        cols_num2_2 = cols4.selectbox('tmp', select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[1])
+                                cols_num = splited_formation[(horizon_cont_count)*(-1)]
+                                placeholder_list = st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1]
+                                select_element_list = edited_entry_df_copy['선수명'] + ": " + edited_entry_df_copy['주포지션'] + "✅  " + edited_entry_df_copy['부포지션'] + "🔻"
+                                if cols_num in ['2','4']:
+                                    cols1, cols2, cols3, cols4 = st.columns(4)
+                                    if cols_num == '2':
+                                        if (splited_formation == ['4','2','2','2']) & ((horizon_cont_count)*(-1) == -2):
+                                            cols_num2_1 = cols1.selectbox('tmp', select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
+                                            cols_num2_2 = cols4.selectbox('tmp', select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[1])
+                                        else:
+                                            cols_num2_1 = cols2.selectbox('tmp', select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[0])
+                                            cols_num2_2 = cols3.selectbox('tmp', select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
+                                        if cols_num2_1:
+                                            update_name = cols_num2_1.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name,
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1]]
+                                        if cols_num2_2:
+                                            update_name = cols_num2_2.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
+                                                                                                                    update_name]
                                     else:
-                                        cols_num2_1 = cols2.selectbox('tmp', select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[0])
-                                        cols_num2_2 = cols3.selectbox('tmp', select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
-                                    if cols_num2_1:
-                                        update_name = cols_num2_1.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name,
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1]]
-                                    if cols_num2_2:
-                                        update_name = cols_num2_2.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
-                                                                                                                 update_name]
-                                else:
-                                    cols_num4_1 = cols1.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
-                                    cols_num4_2 = cols2.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
-                                    cols_num4_3 = cols3.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[2])
-                                    cols_num4_4 = cols4.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[3])
-                                    if cols_num4_1:
-                                        update_name = cols_num4_1.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name,
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3]]
-                                    if cols_num4_2:
-                                        update_name = cols_num4_2.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
-                                                                                                                update_name,
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3]]
-                                    if cols_num4_3:
-                                        update_name = cols_num4_3.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
-                                                                                                                update_name,
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3]]
-                                    if cols_num4_4:
-                                        update_name = cols_num4_4.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
-                                                                                                                update_name]
-                            if cols_num in ['1','3','5']:
-                                cols1, cols2, cols3, cols4, cols5 = st.columns(5)
-                                if cols_num == '1':
-                                    cols_num1_1 = cols3.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[0])
-                                    if cols_num1_1:
-                                        update_name = cols_num1_1.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name]
-                                if cols_num == '3':
-                                    cols_num3_1 = cols2.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
-                                    cols_num3_2 = cols3.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
-                                    cols_num3_3 = cols4.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[2])
-                                    if cols_num3_1:
-                                        update_name = cols_num3_1.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name,
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1], 
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2]]
-                                    if cols_num3_2:
-                                        update_name = cols_num3_2.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
-                                                                                                                update_name, 
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2]]
-                                    if cols_num3_3:
-                                        update_name = cols_num3_3.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
-                                                                                                                update_name]
-                                if cols_num == '5':
-                                    cols_num5_1 = cols1.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
-                                    cols_num5_2 = cols2.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
-                                    cols_num5_3 = cols3.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[2])
-                                    cols_num5_4 = cols4.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder=placeholder_list[3])
-                                    cols_num5_5 = cols5.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 5", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[4])
-                                    if cols_num5_1:
-                                        update_name = cols_num5_1.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name,
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
-                                    if cols_num5_2:
-                                        update_name = cols_num5_2.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
-                                                                                                                update_name,
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
-                                    if cols_num5_3:
-                                        update_name = cols_num5_3.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
-                                                                                                                update_name,
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
-                                    if cols_num5_4:
-                                        update_name = cols_num5_4.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
-                                                                                                                update_name,
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
-                                    if cols_num5_5:
-                                        update_name = cols_num5_5.split(":")[0]
-                                        st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
-                                                                                                                st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
-                                                                                                                update_name]
-                                
-                    keep_container = st.container(border=True)
-                    with keep_container:
-                        for_session_list_GK = []
-                        st.markdown('<span style="color:blue; font-weight:bold; font-size:25px;">GK</span>', unsafe_allow_html=True)
-                        cols1, cols2, cols3, cols4, cols5 = st.columns(5)
-                        for_session_list_GK = cols3.selectbox('tmp',select_element_list, key=f"selected_key : GK_{tdx}", label_visibility="collapsed",index=None,placeholder="GK")
-                        if for_session_list_GK:
-                            update_name = for_session_list_GK.split(":")[0]
-                            st.session_state['formation_info'][f'{tdx+1}q'][-1] = [update_name]
-
-                    
+                                        cols_num4_1 = cols1.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
+                                        cols_num4_2 = cols2.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
+                                        cols_num4_3 = cols3.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[2])
+                                        cols_num4_4 = cols4.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[3])
+                                        if cols_num4_1:
+                                            update_name = cols_num4_1.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name,
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3]]
+                                        if cols_num4_2:
+                                            update_name = cols_num4_2.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
+                                                                                                                    update_name,
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3]]
+                                        if cols_num4_3:
+                                            update_name = cols_num4_3.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                                    update_name,
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3]]
+                                        if cols_num4_4:
+                                            update_name = cols_num4_4.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0], 
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                                    update_name]
+                                if cols_num in ['1','3','5']:
+                                    cols1, cols2, cols3, cols4, cols5 = st.columns(5)
+                                    if cols_num == '1':
+                                        cols_num1_1 = cols3.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[0])
+                                        if cols_num1_1:
+                                            update_name = cols_num1_1.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name]
+                                    if cols_num == '3':
+                                        cols_num3_1 = cols2.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
+                                        cols_num3_2 = cols3.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
+                                        cols_num3_3 = cols4.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[2])
+                                        if cols_num3_1:
+                                            update_name = cols_num3_1.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name,
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1], 
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2]]
+                                        if cols_num3_2:
+                                            update_name = cols_num3_2.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                                    update_name, 
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2]]
+                                        if cols_num3_3:
+                                            update_name = cols_num3_3.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                                    update_name]
+                                    if cols_num == '5':
+                                        cols_num5_1 = cols1.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 1", label_visibility="collapsed",index=None,placeholder="L"+placeholder_list[0])
+                                        cols_num5_2 = cols2.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 2", label_visibility="collapsed",index=None,placeholder=placeholder_list[1])
+                                        cols_num5_3 = cols3.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 3", label_visibility="collapsed",index=None,placeholder=placeholder_list[2])
+                                        cols_num5_4 = cols4.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 4", label_visibility="collapsed",index=None,placeholder=placeholder_list[3])
+                                        cols_num5_5 = cols5.selectbox('tmp',select_element_list, key=f"selected_key : tab{tdx+1}, container{horizon_cont_count}, cols_num{cols_num}, 5", label_visibility="collapsed",index=None,placeholder="R"+placeholder_list[4])
+                                        if cols_num5_1:
+                                            update_name = cols_num5_1.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [update_name,
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
+                                        if cols_num5_2:
+                                            update_name = cols_num5_2.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                                    update_name,
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
+                                        if cols_num5_3:
+                                            update_name = cols_num5_3.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                                    update_name,
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
+                                        if cols_num5_4:
+                                            update_name = cols_num5_4.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                                    update_name,
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][4]]
+                                        if cols_num5_5:
+                                            update_name = cols_num5_5.split(":")[0]
+                                            st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1] = [st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][0],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][1],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][2],
+                                                                                                                    st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1][3],
+                                                                                                                    update_name]
+                                    
+                        keep_container = st.container(border=True)
+                        with keep_container:
+                            for_session_list_GK = []
+                            st.markdown('<span style="color:blue; font-weight:bold; font-size:25px;">GK</span>', unsafe_allow_html=True)
+                            cols1, cols2, cols3, cols4, cols5 = st.columns(5)
+                            for_session_list_GK = cols3.selectbox('tmp',select_element_list, key=f"selected_key : GK_{tdx}", label_visibility="collapsed",index=None,placeholder="GK")
+                            if for_session_list_GK:
+                                update_name = for_session_list_GK.split(":")[0]
+                                st.session_state['formation_info'][f'{tdx+1}q'][-1] = [update_name]
 
                         
-                    find_overlap_player_list = st.session_state['formation_info'][f'{tdx+1}q'][:]
-                    find_overlap_player_list = [f for fopl in find_overlap_player_list for f in fopl]
-                    find_overlap_player_list = [s for s in find_overlap_player_list if re.search(r'[\uAC00-\uD7A3]+', s)]
-                    counts = Counter(find_overlap_player_list)
-                    duplicates = [item for item, count in counts.items() if count > 1]
-                    st.session_state['duplicate_info'][f'{tdx+1}q'] = duplicates
-                    if len(duplicates) >0 :
-                        st.error(f"**\*notice**\n\n중복되는 선수가 존재합니다. \n\n{'❌  '.join(duplicates)}❌  ")
-                        
+
+                            
+                        find_overlap_player_list = st.session_state['formation_info'][f'{tdx+1}q'][:]
+                        find_overlap_player_list = [f for fopl in find_overlap_player_list for f in fopl]
+                        find_overlap_player_list = [s for s in find_overlap_player_list if re.search(r'[\uAC00-\uD7A3]+', s)]
+                        counts = Counter(find_overlap_player_list)
+                        duplicates = [item for item, count in counts.items() if count > 1]
+                        st.session_state['duplicate_info'][f'{tdx+1}q'] = duplicates
+                        if len(duplicates) >0 :
+                            st.error(f"**\*notice**\n\n중복되는 선수가 존재합니다. \n\n{'❌  '.join(duplicates)}❌  ")
+                            
     
 
 
@@ -416,7 +413,7 @@ with st.sidebar:
     
     
     is_all_empty = all(value == [] for value in st.session_state['duplicate_info'].values())
-    if (len(players) >= 11) and (is_all_empty):
+    if (len(players) >= 11) and (is_all_empty) and (allocated_quarters_num == 44):
         formation_list = list(st.session_state['formation_info']['formation'].values())
         
         if '선택' not in formation_list:
@@ -512,8 +509,9 @@ with st.sidebar:
     else:
         # st.write(len(players))
         if len(players) >= 11:
-            duplicate_problem_list = [f"{key[0]}쿼터" for key, value in st.session_state['duplicate_info'].items() if value != []]
-            st.error(f"**\*notice**\n\n스쿼드 인원 수 혹은 {', '.join(duplicate_problem_list)}에 중복 인원이 존재합니다.")            
+            if (allocated_quarters_num == 44):
+                duplicate_problem_list = [f"{key[0]}쿼터" for key, value in st.session_state['duplicate_info'].items() if value != []]
+                st.error(f"**\*notice**\n\n스쿼드 인원 수 혹은 {', '.join(duplicate_problem_list)}에 중복 인원이 존재합니다.")            
                 
 
 
