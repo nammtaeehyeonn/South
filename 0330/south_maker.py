@@ -332,44 +332,36 @@ with st.sidebar:
     # st.write(st.session_state['squad_info'])
     st.write(st.session_state['formation_info'])
     
-    # index = [idx+1 for idx in range(len(players))]
-    real_name_series = select_element_list.apply(lambda x: x.split(":")[0])
-    quarter_table = pd.concat([real_name_series,pd.DataFrame([[0,"","","",""]]*len(select_element_list))], axis = 1)
-    quarter_table.columns = ["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"]
-    quarter_table.index = [idx+1 for idx in range(len(players))]
-    
-    f_dict = copy.deepcopy(st.session_state['formation_info'])
-    
-    for qdx, quarter in enumerate(f_dict['formation']):
-        # print(f_dict['formation'][quarter])
-        # print(for_dot_position[f_dict['formation'][quarter]][::-1] + [['GK']])
-        origin_position_list = [minis for mini_list in for_dot_position[f_dict['formation'][quarter]][::-1] + [['GK']] for minis in mini_list]
-        include_chk_list = [minis for mini_list in f_dict[quarter] for minis in mini_list]
-        # print(origin_position_list)
-        # print(include_chk_list)
-        for ndx, name in enumerate(include_chk_list):
-            if name in real_name_series.values:
-                # print(name, f"{qdx+1}Q", origin_position_list[ndx])
-                quarter_table.loc[quarter_table['이름'] == name, f"{qdx+1}Q"] = origin_position_list[ndx]
-                quarter_table.loc[:, '쿼터 수'] = (quarter_table.loc[:, ['1Q','2Q','3Q','4Q']] != "").sum(axis = 1)
-    
-    t_quarter = quarter_table['쿼터 수'].sum()
-    t_1q = (quarter_table['1Q'] != "").sum()
-    t_2q = (quarter_table['2Q'] != "").sum()
-    t_3q = (quarter_table['3Q'] != "").sum()
-    t_4q = (quarter_table['4Q'] != "").sum()
-    
-    total_df = pd.DataFrame([["총합",t_quarter, t_1q, t_2q, t_3q, t_4q]], columns=["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"])
-    final_quarter_table = pd.concat([total_df, quarter_table])
-    
-    st.dataframe(final_quarter_table, use_container_width=True, column_order= ("index", "이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"), height=int(35.2*(len(final_quarter_table)+1))) # 한 라인당 54
-    
     if (len(players) >= 11):
         fontRegistered()
         plt.rc('font', family='NanumGothic')
         
         formation_list = list(st.session_state['formation_info']['formation'].values())
         if '선택' not in formation_list:
+            real_name_series = select_element_list.apply(lambda x: x.split(":")[0])
+            quarter_table = pd.concat([real_name_series,pd.DataFrame([[0,"","","",""]]*len(select_element_list))], axis = 1)
+            quarter_table.columns = ["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"]
+            quarter_table.index = [idx+1 for idx in range(len(players))]
+            
+            f_dict = copy.deepcopy(st.session_state['formation_info'])
+            
+            for qdx, quarter in enumerate(f_dict['formation']):
+                origin_position_list = [minis for mini_list in for_dot_position[f_dict['formation'][quarter]][::-1] + [['GK']] for minis in mini_list]
+                include_chk_list = [minis for mini_list in f_dict[quarter] for minis in mini_list]
+                for ndx, name in enumerate(include_chk_list):
+                    if name in real_name_series.values:
+                        quarter_table.loc[quarter_table['이름'] == name, f"{qdx+1}Q"] = origin_position_list[ndx]
+                        quarter_table.loc[:, '쿼터 수'] = (quarter_table.loc[:, ['1Q','2Q','3Q','4Q']] != "").sum(axis = 1)
+            
+            t_quarter = quarter_table['쿼터 수'].sum()
+            t_1q, t_2q, t_3q, t_4q = (quarter_table['1Q'] != "").sum(), (quarter_table['2Q'] != "").sum(), (quarter_table['3Q'] != "").sum(), (quarter_table['4Q'] != "").sum()
+            
+            total_df = pd.DataFrame([["총합",t_quarter, t_1q, t_2q, t_3q, t_4q]], columns=["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"])
+            final_quarter_table = pd.concat([total_df, quarter_table])
+            
+            st.dataframe(final_quarter_table, use_container_width=True, column_order= ("index", "이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"), height=int(35.2*(len(final_quarter_table)+1))) # 한 라인당 54
+            
+            
             fig, ax = plt.subplots(figsize=(6, 8))
             
             graph_fig_dict = dict()
