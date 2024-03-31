@@ -14,6 +14,8 @@ import time
 import datetime
 import subprocess
 import copy
+import re
+from collections import Counter
 
 from pymongo.mongo_client import MongoClient
 
@@ -66,8 +68,12 @@ if 'squad_info' not in st.session_state:
     st.session_state['squad_info'] = {}
 if 'formation_info' not in st.session_state:
     st.session_state['formation_info'] = {}  
-
-
+if 'duplicate_info' not in st.session_state:
+    st.session_state['duplicate_info'] = {}  
+    st.session_state['duplicate_info']['1q'] = []  
+    st.session_state['duplicate_info']['2q'] = []  
+    st.session_state['duplicate_info']['3q'] = []  
+    st.session_state['duplicate_info']['4q'] = []  
 st.title("SOUTH_MAKER")
 
 
@@ -186,11 +192,14 @@ if len(players) >= 11:
             formation_list = list(st.session_state['formation_info']['formation'].values())
             tab1, tab2, tab3, tab4 = st.tabs(["**▪1쿼터▪**", "**▪2쿼터▪**", "**▪3쿼터▪**", "**▪4쿼터▪**"])
             con_dict = {}
+            
             for tdx, tab in enumerate([tab1, tab2, tab3, tab4]):
                 with tab:
                     con_dict[tab] = {}
                     splited_formation = formation_list[tdx].split("-")
                     st.session_state['formation_info'][f'{tdx+1}q'] = eng_formation_dict[formation_list[tdx]][::-1] + [["GK"]]
+                    
+
                     for horizon_cont in range(len(splited_formation)):
                         horizon_cont_count = horizon_cont+1
                         con_dict[tab]['formation'] = splited_formation
@@ -203,6 +212,13 @@ if len(players) >= 11:
                             cols_num = splited_formation[(horizon_cont_count)*(-1)]
                             placeholder_list = st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1]
                             select_element_list = edited_entry_df_copy['선수명'] + ": " + edited_entry_df_copy['주포지션'] + "✅  " + edited_entry_df_copy['부포지션'] + "🔻"
+                            # unduplicated_select_element_list = select_element_list[~select_element_list.apply(lambda x: x.split(":")[0]).isin(duplicates_series)]
+                            # print(unduplicated_select_element_list)                            
+                            # print()
+                            
+                            
+                            # print(st.session_state['duplicate_info'])
+                            # if st.session_state['duplicate_info'][f'{tdx+1}q'] != []:
                             if cols_num in ['2','4']:
                                 cols1, cols2, cols3, cols4 = st.columns(4)
                                 if cols_num == '2':
@@ -327,6 +343,31 @@ if len(players) >= 11:
                             update_name = for_session_list_GK.split(":")[0]
                             st.session_state['formation_info'][f'{tdx+1}q'][-1] = [update_name]
 
+                    
+
+                        
+                    # print(st.session_state['formation_info'][f'{tdx+1}q'])
+                    # print()
+                    find_overlap_player_list = st.session_state['formation_info'][f'{tdx+1}q'][:]
+                    print(find_overlap_player_list)
+                    find_overlap_player_list = [f for fopl in find_overlap_player_list for f in fopl]
+                    print(find_overlap_player_list)
+                    find_overlap_player_list = [s for s in find_overlap_player_list if re.search(r'[\uAC00-\uD7A3]+', s)]
+                    counts = Counter(find_overlap_player_list)
+                    print(find_overlap_player_list)
+                    duplicates = [item for item, count in counts.items() if count > 1]
+                    st.session_state['duplicate_info'][f'{tdx+1}q'] = duplicates
+                    print(st.session_state['duplicate_info'][f'{tdx+1}q'])
+                    
+                    if len(duplicates) >0 :
+                        st.error(f"**\*notice**\n\n중복되는 선수가 존재합니다. \n\n{'❌  '.join(duplicates)}❌  ")
+                        
+                    # duplicates_series = pd.Series(st.session_state['duplicate_info'][f'{tdx+1}q'])
+                    # print(duplicates_series)
+                    print("="*100)
+            # print(duplicates_series)
+            print()
+            print()
     
 
 
@@ -336,8 +377,11 @@ with st.sidebar:
     # st.write(st.session_state['game_info'])
     # st.write(st.session_state['squad_info'])
     # st.write(st.session_state['formation_info'])
+    # st.write(st.session_state['duplicate_info'])
     
-    if (len(players) >= 11):
+    
+    is_all_empty = all(value == [] for value in st.session_state['duplicate_info'].values())
+    if (len(players) >= 11) and (is_all_empty):
         formation_list = list(st.session_state['formation_info']['formation'].values())
         
         if '선택' not in formation_list:
@@ -360,7 +404,7 @@ with st.sidebar:
                 t_quarter = quarter_table['쿼터 수'].sum()
                 t_1q, t_2q, t_3q, t_4q = (quarter_table['1Q'] != "").sum(), (quarter_table['2Q'] != "").sum(), (quarter_table['3Q'] != "").sum(), (quarter_table['4Q'] != "").sum()
                 
-                total_df = pd.DataFrame([["총합",t_quarter, t_1q, t_2q, t_3q, t_4q]], columns=["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"])
+                total_df = pd.DataFrame([["총합",t_quarter, str(t_1q), str(t_2q), str(t_3q), str(t_4q)]], columns=["이름", "쿼터 수", "1Q", "2Q", "3Q", "4Q"])
                 final_quarter_table = pd.concat([total_df, quarter_table])
                 
                 st.dataframe(final_quarter_table, use_container_width=True, 
@@ -430,7 +474,8 @@ with st.sidebar:
             # st.pyplot(graph_fig_dict['fig2'])
             # st.pyplot(graph_fig_dict['fig3'])
             # st.pyplot(graph_fig_dict['fig4'])
-                
+    else:
+        st.error(f"**\*notice**\n\n스쿼드 인원 수 혹은 포메이션에 중복 인원이 존재합니다.")            
                 
 
 
