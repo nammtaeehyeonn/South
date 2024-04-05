@@ -88,7 +88,8 @@ with st.expander('**1️⃣ 경기 정보 입력**'):
     st.divider()
     date = st.date_input("**경기 날짜**")
     st.write("")
-    start_time = st.time_input("**경기 시간**", datetime.time(9,00), step=datetime.timedelta(minutes = 30))
+    # start_time = st.time_input("**경기 시간**", datetime.time(9,00), step=datetime.timedelta(minutes = 30))
+    start_time = st.slider("**경기 시작 시간**", 6, 22,9)
     st.write("")
     location = st.text_input("**경기 장소**")
     if location:
@@ -199,6 +200,16 @@ if len(players) >= 11:
         
             st.write("")
             st.write("**쿼터 수 배정**")
+            # c1, c2 = st.columns(2)
+            # with c1:
+            #     st.write("**쿼터 수 배정**")
+            # with c2:
+            #     random_quarter = st.button("**랜덤 배정하기**"):
+            #################################################################################
+            # 
+            #################################################################################
+            
+            
             quarter_allocate_df = pd.concat([edited_entry_df_copy['선수명'], pd.DataFrame([0]*len(edited_entry_df_copy['선수명']))], axis=1)
             quarter_allocate_df.columns = ['선수명', '배정 쿼터 수']
             quarter_allocate_df.index = [idx+1 for idx in range(len(players))]
