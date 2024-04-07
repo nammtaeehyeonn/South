@@ -444,55 +444,35 @@ if slider:
 
 
 
-            if final_quarter_table.iloc[0, 2:].astype(int).sum() >= 3:
+            if final_quarter_table.iloc[0, 2:].astype(int).sum() == 44:
                 save_button_bool = True
 
 
 
 if save_button_bool:
-    # st.pyplot(graph_fig_dict['fig1'])
-    
-    # fig = plt.figure()
-    # ax1 = fig.add_subplot(221)    
-    # ax1.plot(graph_fig_dict['fig1'])
-    
-    # print(img_dict)
-    # plt.plot(graph_fig_dict['fig1'])
     save_images_to_session_state(graph_fig_dict)
     image1 = load_image_from_session_state("fig1")
     image2 = load_image_from_session_state("fig2")
     image3 = load_image_from_session_state("fig3")
     image4 = load_image_from_session_state("fig4")
         
-    # 경계선 너비 설정
     border_width = 50  # 픽셀 단위
 
-    # 새 캔버스의 크기를 결정 (각 이미지 사이에 경계선 너비를 추가)
     canvas_width = max(image1.width, image2.width) + max(image3.width, image4.width) + 3 * border_width
     canvas_height = max(image1.height, image3.height) + max(image2.height, image4.height) + 3 * border_width
 
-    # 새로운 이미지를 생성 (경계선 색상을 흰색으로 설정)
     new_im = Image.new('RGB', (canvas_width, canvas_height), 'white')
 
-    # 새 이미지에 각 이미지를 붙여넣기 (경계선 고려)
     new_im.paste(image1, (border_width, border_width))
     new_im.paste(image2, (image1.width + 2 * border_width, border_width))
     new_im.paste(image3, (border_width, image1.height + 2 * border_width))
     new_im.paste(image4, (image3.width + 2 * border_width, image2.height + 2 * border_width))
 
-    # 결과 이미지를 저장하거나 표시
-    # new_im.save("path/to/your/combined_image_with_borders.jpg")
-    # 또는 new_im.show()를 사용하여 바로 볼 수 있습니다
-
-    # 결과 이미지를 저장하거나 표시합니다
     new_im.save("./0330/four_plots.png")    
-
-
-    # st.download_button("포메이션 저장")
-    
+    st.success("모든 포메이션이 결정되었습니다. \n\n좌측 사이드바를 확인하고 이미지를 저장하려면 아래 버튼을 눌러주세요.")
     with open("./0330/four_plots.png", "rb") as file:
         btn = st.download_button(
-                label="Download image",
+                label="포메이션 저장",
                 data=file,
                 file_name="South_formation.png",
                 mime="image/png"
