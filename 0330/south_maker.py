@@ -444,7 +444,7 @@ if slider:
 
 
 
-            if final_quarter_table.iloc[0, 2:].astype(int).sum() == 3:
+            if final_quarter_table.iloc[0, 2:].astype(int).sum() >= 3:
                 save_button_bool = True
 
 
