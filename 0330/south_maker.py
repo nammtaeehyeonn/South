@@ -19,7 +19,7 @@ from collections import Counter
 
 from pymongo.mongo_client import MongoClient
 
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 
 @st.cache_data
 def fontRegistered():
@@ -110,9 +110,14 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
     st.session_state['squad_info']['players'] = players
     entry_df = pd.DataFrame()
     if st.session_state['squad_info']['players']:
-        entry_df = pd.DataFrame([{"선수명":p, "주포지션":all_entry_dict[p]["주포지션"], "부포지션":','.join(all_entry_dict[p]["부포지션"])} for p in players], index = [idx+1 for idx in range(len(players))])
+        entry_df = pd.DataFrame([{"선수명":p, "배정쿼터수": 1, "주포지션":all_entry_dict[p]["주포지션"], "부포지션":','.join(all_entry_dict[p]["부포지션"])} for p in players], index = [idx+1 for idx in range(len(players))])
         edited_entry_df = st.data_editor(entry_df, use_container_width=True,
                                          column_config={
+                                            "배정쿼터수": st.column_config.NumberColumn(
+                                                min_value=1,
+                                                max_value=4,
+                                                step=1,
+                                            ),
                                             "주포지션": st.column_config.TextColumn(
                                                 validate='^(GK|CB|WB|CM|WM|CF|WF)$'
                                             ), 
@@ -121,40 +126,79 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
                                             )}, height=int(35.2*(len(entry_df)+1)))
         find_sub_pos_series = edited_entry_df['주포지션'] + ","+ edited_entry_df['부포지션']
         st.session_state['squad_info']['players'] = json.loads(edited_entry_df.to_json(orient='records'))
-        st.write("")
         
-        main_pos_list = []
-        sub_pos_list = []
-        for i in ['GK','CB', 'CM', 'CF', 'WB', 'WM', 'WF']:
-            main_pos_list.append((edited_entry_df['주포지션'] == i).sum()) 
-            sub_pos_list.append((find_sub_pos_series.apply(lambda x : i in x)).sum())
-        
-
-        st.write("**스쿼드 분석**")
-        tab1, tab2 = st.tabs(["**▪주포지션▪**", "**▪부포지션 포함▪**"])
-        with tab1:
-            chart_data_tab1= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": main_pos_list[:4], "윙": [0] + main_pos_list[4:]})
-            st.bar_chart(chart_data_tab1, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"], use_container_width=True)
-            for idx in range(4):
-                st.caption(f"{chart_data_tab1['포지션'][idx]}")
-                if idx == 0:
-                    mini_df = pd.DataFrame([main_pos_list[idx]], columns=['총원'])
-                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
-                else:
-                    mini_df = pd.DataFrame([[main_pos_list[idx]+main_pos_list[idx+3],main_pos_list[idx],main_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
-                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+        if len(players) >= 11:
+            st.write("**위치 이동**")
+            st.markdown('<span style="color:blue; font-style:italic; font-size:15px;">* 주포지션을 기준으로 가장 공평하게 나눈 쿼터 수 입니다.</span>', unsafe_allow_html=True)
+            gk_count = (edited_entry_df['주포지션'] == 'GK').sum()
+            gk_quarter = 4 if gk_count == 0 else 4/gk_count
+            except_gk_count = len(edited_entry_df) - (edited_entry_df['주포지션'] == 'GK').sum()
+            except_gk_quarter = 44 if gk_count == 0 else 40
+            if gk_count > 0:
+                col1, col2, col3, col4 = st.columns(4)
+                col1.metric("전체인원", f"총 {len(edited_entry_df)}명", "")
+                col2.metric("골키퍼", f"{gk_count}명", f"{int(gk_quarter)}쿼터")
+                col3.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+                if int(except_gk_quarter/except_gk_count) != 4:
+                    col4.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
+            else:
+                col1, col2, col3 = st.columns(3)
+                col1.metric("전체인원", f"총 {len(edited_entry_df)}명", f"골키퍼:{gk_count}명")
+                col2.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+                if int(except_gk_quarter/except_gk_count) != 4:
+                    col3.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
             
-        with tab2:
-            chart_data_tab2= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": sub_pos_list[:4], "윙": [0] + sub_pos_list[4:]})
-            st.bar_chart(chart_data_tab2, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"], use_container_width=True)
-            for idx in range(4):
-                st.caption(f"{chart_data_tab1['포지션'][idx]}")
-                if idx == 0:
-                    mini_df = pd.DataFrame([sub_pos_list[idx]], columns=['총원'])
-                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
-                else:
-                    mini_df = pd.DataFrame([[sub_pos_list[idx]+sub_pos_list[idx+3],sub_pos_list[idx],sub_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
-                    edited_entry_df = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+            st.divider()
+            allocated_quarters_num = edited_entry_df['배정쿼터수'].sum()
+            allocated_quarters_players = (edited_entry_df['배정쿼터수'] != 0).sum()
+            quarters_for_metric = list(edited_entry_df['배정쿼터수'].unique())
+            quarters_for_metric.sort()
+            if 0 in quarters_for_metric: quarters_for_metric.remove(0)
+            
+            columns = st.columns(len(quarters_for_metric)+1)
+            columns[0].metric(label="현재 배정된 쿼터 수", value=f"{allocated_quarters_num}/44", delta=f"{allocated_quarters_players}명")
+            for col,qfm in zip(columns[1:], quarters_for_metric):
+                quarter_play = (edited_entry_df['배정쿼터수'] == qfm).sum()
+                col.metric(label=" ", value=f"{quarter_play}명", delta=f"{qfm}쿼터")    
+                
+            if allocated_quarters_num > 44:
+                st.error("쿼터 수를 초과했습니다.")
+                st.stop()
+            st.divider()
+            st.write("")
+            
+            main_pos_list = []
+            sub_pos_list = []
+            for i in ['GK','CB', 'CM', 'CF', 'WB', 'WM', 'WF']:
+                main_pos_list.append((edited_entry_df['주포지션'] == i).sum()) 
+                sub_pos_list.append((find_sub_pos_series.apply(lambda x : i in x)).sum())
+            
+
+            st.write("**스쿼드 분석**")
+            tab1, tab2 = st.tabs(["**▪주포지션▪**", "**▪부포지션 포함▪**"])
+            with tab1:
+                chart_data_tab1= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": main_pos_list[:4], "윙": [0] + main_pos_list[4:]})
+                st.bar_chart(chart_data_tab1, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"], use_container_width=True)
+                for idx in range(4):
+                    st.caption(f"{chart_data_tab1['포지션'][idx]}")
+                    if idx == 0:
+                        mini_df = pd.DataFrame([main_pos_list[idx]], columns=['총원'])
+                        edited_entry_df_mini = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+                    else:
+                        mini_df = pd.DataFrame([[main_pos_list[idx]+main_pos_list[idx+3],main_pos_list[idx],main_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
+                        edited_entry_df_mini = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+                
+            with tab2:
+                chart_data_tab2= pd.DataFrame({"포지션": ['1.골키퍼', '2.수비수', '3.미드필더', '4.공격수'], "중앙": sub_pos_list[:4], "윙": [0] + sub_pos_list[4:]})
+                st.bar_chart(chart_data_tab2, x="포지션", y=["중앙", "윙"], color=["#FF0000", "#0000FF"], use_container_width=True)
+                for idx in range(4):
+                    st.caption(f"{chart_data_tab1['포지션'][idx]}")
+                    if idx == 0:
+                        mini_df = pd.DataFrame([sub_pos_list[idx]], columns=['총원'])
+                        edited_entry_df_mini = st.dataframe(mini_df, use_container_width=True, hide_index=True)
+                    else:
+                        mini_df = pd.DataFrame([[sub_pos_list[idx]+sub_pos_list[idx+3],sub_pos_list[idx],sub_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
+                        edited_entry_df_mini = st.dataframe(mini_df, use_container_width=True, hide_index=True)
 
         
         
@@ -173,33 +217,33 @@ if len(players) >= 11:
         formation4 = st.selectbox('**4쿼터 포메이션**',eng_formation_list, key="formation4")
         st.session_state['formation_info']['formation'] = {"1q": formation1, "2q": formation2, "3q": formation3, "4q": formation4}
         edited_entry_df_copy = pd.DataFrame(st.session_state['squad_info']['players'])
-        allocated_quarters_num = 0
+        # allocated_quarters_num = 0
         if "선택" not in list(st.session_state['formation_info']['formation'].values()):
             st.divider()
-            st.write("**쿼터 수 분석**")
-            st.markdown('<span style="color:blue; font-style:italic; font-size:15px;">* 주포지션을 기준으로 가장 공평하게 나눈 쿼터 수 입니다.</span>', unsafe_allow_html=True)
-            gk_count = (edited_entry_df_copy['주포지션'] == 'GK').sum()
-            gk_quarter = 4 if gk_count == 0 else 4/gk_count
-            except_gk_count = len(edited_entry_df_copy) - (edited_entry_df_copy['주포지션'] == 'GK').sum()
-            except_gk_quarter = 44 if gk_count == 0 else 40
+            # st.write("**쿼터 수 분석**")
+            # st.markdown('<span style="color:blue; font-style:italic; font-size:15px;">* 주포지션을 기준으로 가장 공평하게 나눈 쿼터 수 입니다.</span>', unsafe_allow_html=True)
+            # gk_count = (edited_entry_df_copy['주포지션'] == 'GK').sum()
+            # gk_quarter = 4 if gk_count == 0 else 4/gk_count
+            # except_gk_count = len(edited_entry_df_copy) - (edited_entry_df_copy['주포지션'] == 'GK').sum()
+            # except_gk_quarter = 44 if gk_count == 0 else 40
             
-            if len(players) >= 11:
-                if gk_count > 0:
-                    col1, col2, col3, col4 = st.columns(4)
-                    col1.metric("전체인원", f"총 {len(edited_entry_df_copy)}명", "")
-                    col2.metric("골키퍼", f"{gk_count}명", f"{int(gk_quarter)}쿼터")
-                    col3.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
-                    if int(except_gk_quarter/except_gk_count) != 4:
-                        col4.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
-                else:
-                    col1, col2, col3 = st.columns(3)
-                    col1.metric("전체인원", f"총 {len(edited_entry_df_copy)}명", f"골키퍼:{gk_count}명")
-                    col2.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
-                    if int(except_gk_quarter/except_gk_count) != 4:
-                        col3.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
+            # if len(players) >= 11:
+            #     if gk_count > 0:
+            #         col1, col2, col3, col4 = st.columns(4)
+            #         col1.metric("전체인원", f"총 {len(edited_entry_df_copy)}명", "")
+            #         col2.metric("골키퍼", f"{gk_count}명", f"{int(gk_quarter)}쿼터")
+            #         col3.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+            #         if int(except_gk_quarter/except_gk_count) != 4:
+            #             col4.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
+            #     else:
+            #         col1, col2, col3 = st.columns(3)
+            #         col1.metric("전체인원", f"총 {len(edited_entry_df_copy)}명", f"골키퍼:{gk_count}명")
+            #         col2.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
+            #         if int(except_gk_quarter/except_gk_count) != 4:
+            #             col3.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
         
-            st.write("")
-            st.write("**쿼터 수 배정**")
+            # st.write("")
+            # st.write("**쿼터 수 배정**")
             # c1, c2 = st.columns(2)
             # with c1:
             #     st.write("**쿼터 수 배정**")
@@ -210,42 +254,42 @@ if len(players) >= 11:
             #################################################################################
             
             
-            quarter_allocate_df = pd.concat([edited_entry_df_copy['선수명'], pd.DataFrame([0]*len(edited_entry_df_copy['선수명']))], axis=1)
-            quarter_allocate_df.columns = ['선수명', '배정 쿼터 수']
-            quarter_allocate_df.index = [idx+1 for idx in range(len(players))]
+            # quarter_allocate_df = pd.concat([edited_entry_df_copy['선수명'], pd.DataFrame([0]*len(edited_entry_df_copy['선수명']))], axis=1)
+            # quarter_allocate_df.columns = ['선수명', '배정 쿼터 수']
+            # quarter_allocate_df.index = [idx+1 for idx in range(len(players))]
 
-            final_quarter_allocate_table = st.data_editor(quarter_allocate_df, use_container_width = True, 
-                           column_order = ('index', '선수명', '배정 쿼터 수'),
-                           height=int(35.2*(len(quarter_allocate_df)+1)),
-                           disabled=["선수명"],
-                           hide_index=True,
-                           column_config={
-                            "배정 쿼터 수": st.column_config.NumberColumn(
-                                min_value=1,
-                                max_value=4,
-                                step=1,
-                             )
-                            }
-                           )
+            # final_quarter_allocate_table = st.data_editor(quarter_allocate_df, use_container_width = True, 
+            #                column_order = ('index', '선수명', '배정 쿼터 수'),
+            #                height=int(35.2*(len(quarter_allocate_df)+1)),
+            #                disabled=["선수명"],
+            #                hide_index=True,
+            #                column_config={
+            #                 "배정 쿼터 수": st.column_config.NumberColumn(
+            #                     min_value=1,
+            #                     max_value=4,
+            #                     step=1,
+            #                  )
+            #                 }
+            #                )
             
-            allocated_quarters_num = final_quarter_allocate_table['배정 쿼터 수'].sum()
-            allocated_quarters_players = (final_quarter_allocate_table['배정 쿼터 수'] != 0).sum()
-            quarters_for_metric = list(final_quarter_allocate_table['배정 쿼터 수'].unique())
-            quarters_for_metric.sort()
-            if 0 in quarters_for_metric: quarters_for_metric.remove(0)
+            # allocated_quarters_num = final_quarter_allocate_table['배정 쿼터 수'].sum()
+            # allocated_quarters_players = (final_quarter_allocate_table['배정 쿼터 수'] != 0).sum()
+            # quarters_for_metric = list(final_quarter_allocate_table['배정 쿼터 수'].unique())
+            # quarters_for_metric.sort()
+            # if 0 in quarters_for_metric: quarters_for_metric.remove(0)
             
-            columns = st.columns(len(quarters_for_metric)+1)
-            columns[0].metric(label="현재 배정된 쿼터 수", value=f"{allocated_quarters_num}/44", delta=f"{allocated_quarters_players}명")
-            for col,qfm in zip(columns[1:], quarters_for_metric):
-                quarter_play = (final_quarter_allocate_table['배정 쿼터 수'] == qfm).sum()
-                col.metric(label=f" ", value=f"{quarter_play}명", delta=f"{qfm}쿼터")
+            # columns = st.columns(len(quarters_for_metric)+1)
+            # columns[0].metric(label="현재 배정된 쿼터 수", value=f"{allocated_quarters_num}/44", delta=f"{allocated_quarters_players}명")
+            # for col,qfm in zip(columns[1:], quarters_for_metric):
+            #     quarter_play = (final_quarter_allocate_table['배정 쿼터 수'] == qfm).sum()
+            #     col.metric(label=f" ", value=f"{quarter_play}명", delta=f"{qfm}쿼터")
             
             formation_list = list(st.session_state['formation_info']['formation'].values())
             tab1, tab2, tab3, tab4 = st.tabs(["**▪1쿼터▪**", "**▪2쿼터▪**", "**▪3쿼터▪**", "**▪4쿼터▪**"])
             con_dict = {}
             
-            if allocated_quarters_num > 44:
-                st.error("쿼터 수를 초과했습니다.")
+            # if allocated_quarters_num > 44:
+            #     st.error("쿼터 수를 초과했습니다.")
                 
 #######################################################################################################################################
 # 0331 쿼터 다 찬 사람 해결 못함                
@@ -266,7 +310,6 @@ if len(players) >= 11:
                         con_dict[tab] = {}
                         splited_formation = formation_list[tdx].split("-")
                         st.session_state['formation_info'][f'{tdx+1}q'] = eng_formation_dict[formation_list[tdx]][::-1] + [["GK"]]
-
                         for horizon_cont in range(len(splited_formation)):
                             horizon_cont_count = horizon_cont+1
                             con_dict[tab]['formation'] = splited_formation
@@ -279,13 +322,6 @@ if len(players) >= 11:
                                 cols_num = splited_formation[(horizon_cont_count)*(-1)]
                                 placeholder_list = st.session_state['formation_info'][f'{tdx+1}q'][horizon_cont_count-1]
                                 select_element_list = edited_entry_df_copy['선수명'] + ": " + edited_entry_df_copy['주포지션'] + "✅  " + edited_entry_df_copy['부포지션'] + "🔻"
-                                # select_element_list = edited_entry_df_copy['선수명']
-                                # print(select_element_list)
-                                # if st.session_state['quarter_allocation_info']['stop_player_name_list_bool']:
-                                #     select_element_list.replace('김동선', "X")
-                                    # b = st.session_state['quarter_allocation_info']['stop_player_name_list']
-                                    # select_element_list = select_element_list[~select_element_list.apply(lambda x: x.split(":")[0]).isin(b)]
-                                # print(select_element_list)
                                     
                                 if cols_num in ['2','4']:
                                     cols1, cols2, cols3, cols4 = st.columns(4)
@@ -452,11 +488,9 @@ with st.sidebar:
             with st.expander("**🔽 쿼터 확인 데이터**"):
                 # real_name_series = select_element_list.apply(lambda x: x.split(":")[0])
                 # quarter_table = pd.concat([real_name_series,pd.DataFrame([[0,"","","",""]]*len(select_element_list))], axis = 1)
-                
-                final_quarter_allocate_table = final_quarter_allocate_table.reset_index(drop=True)
+                final_quarter_allocate_table = edited_entry_df.reset_index(drop=True)
                 real_name_series = final_quarter_allocate_table['선수명']
-                quarter_table = pd.concat([final_quarter_allocate_table,pd.DataFrame([["","","",""]]*len(final_quarter_allocate_table))], axis = 1)
-                
+                quarter_table = pd.concat([final_quarter_allocate_table.iloc[:, :2],pd.DataFrame([["","","",""]]*len(final_quarter_allocate_table))], axis = 1)
                 quarter_table.columns = ["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"]
                 quarter_table.index = [idx+1 for idx in range(len(players))]
                 
@@ -479,7 +513,8 @@ with st.sidebar:
                 
                 total_df = pd.DataFrame([["총합",t_quarter, str(t_1q), str(t_2q), str(t_3q), str(t_4q)]], columns=["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"])
                 final_quarter_table = pd.concat([total_df, quarter_table])
-                slash_quarters = pd.concat([pd.Series(['44']), final_quarter_allocate_table.loc[:, '배정 쿼터 수'].astype('str')]).reset_index(drop=True)
+                final_quarter_table['남은 쿼터 수'] = final_quarter_table['남은 쿼터 수'].astype(str)
+                slash_quarters = pd.concat([pd.Series(['44']), final_quarter_allocate_table['배정쿼터수'].astype(str)]).reset_index(drop=True)
                 final_quarter_table.loc[:, '남은 쿼터 수'] = final_quarter_table.loc[:, '남은 쿼터 수'].astype('str') + '/'+  slash_quarters
                 
                 st.dataframe(final_quarter_table, use_container_width=True, 
@@ -548,7 +583,7 @@ with st.sidebar:
             
                     st.pyplot(graph_fig_dict[f"fig{fdx+1}"])
                     
-        finally_no_errors = True
+        # finally_no_errors = True
         
         
     else:
@@ -559,22 +594,22 @@ with st.sidebar:
                 
 
 # st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = False
-if finally_no_errors:
-    find_stop_select = final_quarter_table.iloc[1:,:2]
-    over_quarter_alloncated = find_stop_select[find_stop_select['남은 쿼터 수'].apply(lambda x: int(x.split("/")[0])) < 0]
+# if finally_no_errors:
+#     find_stop_select = final_quarter_table.iloc[1:,:2]
+#     over_quarter_alloncated = find_stop_select[find_stop_select['남은 쿼터 수'].apply(lambda x: int(x.split("/")[0])) < 0]
     
-    stop_player_name_list = find_stop_select[find_stop_select['남은 쿼터 수'].apply(lambda x: x.split("/")[0]) == "0"]['이름'].values
-    stop_player = "🔸"+stop_player_name_list+"🔸"
+#     stop_player_name_list = find_stop_select[find_stop_select['남은 쿼터 수'].apply(lambda x: x.split("/")[0]) == "0"]['이름'].values
+#     stop_player = "🔸"+stop_player_name_list+"🔸"
     
-    if len(stop_player)> 0:
-        with expander3:
-            st.success(f"**\*notice**\n\n{'     '.join(stop_player)}의 쿼터 배정이 끝났습니다. \n\n자세한 사항은 좌측 사이드 바에서 확인하세요.")
-            st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = True
-            st.session_state['quarter_allocation_info']['stop_player_name_list'] = stop_player_name_list
-            print(st.session_state['quarter_allocation_info']['stop_player_name_list_bool'])
-            print(st.session_state['quarter_allocation_info']['stop_player_name_list'])
-    else:
-        st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = False
+#     if len(stop_player)> 0:
+#         with expander3:
+#             st.success(f"**\*notice**\n\n{'     '.join(stop_player)}의 쿼터 배정이 끝났습니다. \n\n자세한 사항은 좌측 사이드 바에서 확인하세요.")
+#             st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = True
+#             st.session_state['quarter_allocation_info']['stop_player_name_list'] = stop_player_name_list
+#             print(st.session_state['quarter_allocation_info']['stop_player_name_list_bool'])
+#             print(st.session_state['quarter_allocation_info']['stop_player_name_list'])
+#     else:
+#         st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = False
 
 
 ############쿼터 다 찬 사람 해결 못함
