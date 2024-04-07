@@ -64,11 +64,10 @@ def load_image_from_session_state(key):
     return None
 
 
-
-uri = "mongodb+srv://skaxogusdl:skaclxo661@southdb.h5j75si.mongodb.net/?retryWrites=true&w=majority&appName=SOUTHDB"
-client = MongoClient(uri)
-db = client.mydb
 if 'DB' not in st.session_state:
+    uri = "mongodb+srv://skaxogusdl:skaclxo661@southdb.h5j75si.mongodb.net/?retryWrites=true&w=majority&appName=SOUTHDB"
+    client = MongoClient(uri)
+    db = client.mydb
     st.session_state.DB = {"uri":uri, "client":client, "db":db}
     print("="*100)
     print("Pinged your deployment. You successfully connected to MongoDB!")
@@ -77,21 +76,11 @@ if 'DB' not in st.session_state:
 with open("./0330/all_entry.json", "r") as f:
     all_entry_dict = json.load(f)   
 all_players_list = list(all_entry_dict.keys())
-if 'all_entry_dict' not in st.session_state:
-    st.session_state.all_entry_dict = {"all_entry_dict":all_entry_dict}
-    print("="*100)
-    print("load all_entry")
-    print("="*100)
     
 with open("./0330/eng_formation_dict.json", "r") as f:
     eng_formation_dict = json.load(f)   
 for_dot_position = copy.deepcopy(eng_formation_dict)
 eng_formation_list = list(eng_formation_dict.keys())
-if 'eng_formation_dict' not in st.session_state:
-    st.session_state.eng_formation_dict = {"eng_formation_dict":eng_formation_dict}
-    print("="*100)
-    print("load eng_formation")
-    print("="*100)
 
 
 if 'game_info' not in st.session_state:
@@ -100,20 +89,11 @@ if 'squad_info' not in st.session_state:
     st.session_state['squad_info'] = {}
 if 'formation_info' not in st.session_state:
     st.session_state['formation_info'] = {}  
-if 'duplicate_info' not in st.session_state:
-    st.session_state['duplicate_info'] = {}  
-    st.session_state['duplicate_info']['1q'] = []  
-    st.session_state['duplicate_info']['2q'] = []  
-    st.session_state['duplicate_info']['3q'] = []  
-    st.session_state['duplicate_info']['4q'] = []  
-if 'quarter_allocation_info' not in st.session_state:
-    st.session_state['quarter_allocation_info'] = {} 
-    st.session_state['quarter_allocation_info']['total'] = 0
-    st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = False
-    st.session_state['quarter_allocation_info']['stop_player_name_list'] = []
 st.title("SOUTH_MAKER")
 
 
+# if st.button(""):
+#     st.switch_page("pages/game_result.py")
     
 with st.expander('**1️⃣ 경기 정보 입력**'):
     finally_no_errors = False
@@ -130,7 +110,7 @@ with st.expander('**1️⃣ 경기 정보 입력**'):
     st.write("")
     opposing_team = st.text_input("**상대팀 명**")
     
-    st.session_state['game_info']['date'] = date
+    st.session_state['game_info']['date'] = f"{date.year}/{date.month}/{date.day}"
     st.session_state['game_info']['start_time'] = start_time
     st.session_state['game_info']['location'] = location
     st.session_state['game_info']['opposing_team'] = opposing_team
@@ -442,9 +422,8 @@ if slider:
                         hide_index = True,
                         height=int(35.2*(len(final_quarter_table)+1)))
 
-
-
             if final_quarter_table.iloc[0, 2:].astype(int).sum() == 44:
+            # if final_quarter_table.iloc[0, 2:].astype(int).sum() >= 3:
                 save_button_bool = True
 
 
@@ -477,13 +456,29 @@ if save_button_bool:
                 file_name="South_formation.png",
                 mime="image/png"
             )
+        
+        
+    
+##############################################################################
+    # db_button = st.button("DB", type="primary")
+    # if db_button:
+    #     st.session_state['final_df'] = final_quarter_table
+        
+    #     # st.write(st.session_state.DB)
+    #     # st.write(st.session_state.game_info)
+    #     # st.write(st.session_state.formation_info)
+    #     # st.write(st.session_state.image_dict)
+    #     # st.dataframe(st.session_state.final_df)
+        
+    #     db1 = st.session_state.DB['db']
+        
+    #     game_info = st.session_state.game_info
+    #     formation_info = st.session_state.formation_info
+    #     # df_info = st.session_state.final_df.to_json(orient='records', ensure_ascii= False)
+    #     df_info = json.loads(final_quarter_table.to_json(orient='columns'))
+    #     print(df_info)
+    #     # doc = {'name':'dsadsaassadasdamy','age':15156159} # 데이터 하나
+    #     # db1.users.insert_one(game_info)
+    #     # db1.users.insert_one(formation_info)
+    #     # db1.users.insert_one(df_info)
 
-
-if st.button("Home1"):
-    st.switch_page("game_result.py")
-if st.button("Home2"):
-    st.switch_page("./game_result.py")
-if st.button("Hom3e"):
-    st.switch_page("./0330/game_result.py")
-if st.button("Home4"):
-    st.switch_page("0330/game_result.py")
