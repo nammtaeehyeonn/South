@@ -76,6 +76,7 @@ from collections import Counter
 import json
 import streamlit as st
 from find_positions import define_cols_containers
+import pandas as pd
 
 # 포메이션 데이터 로드
 with open("./0330/eng_formation_dict.json", "r") as f:
@@ -100,7 +101,6 @@ all_selected_players = []
 for tab_players in st.session_state["tab_selected_players"].values():
     all_selected_players.extend([player for player in tab_players.values() if player != ''])
 total_selection_counts = Counter(all_selected_players)
-print(total_selection_counts)
 
 # 각 탭별로 선수 선택 로직 처리
 for tdx, tab in enumerate(tabs):

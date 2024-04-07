@@ -34,37 +34,6 @@ def fontRegistered():
 fontRegistered()
 plt.rc('font', family='NanumGothic')
 
-
-def convert_fig_to_bytes(fig):
-    buf = io.BytesIO()
-    fig.savefig(buf, format='PNG', dpi=300, bbox_inches='tight', pad_inches=0)
-    plt.close(fig)  # 리소스 해제
-    buf.seek(0)
-    return buf.getvalue()
-
-def save_images_to_session_state(fig_dict):
-    if 'image_dict' not in st.session_state:
-        st.session_state['image_dict'] = {}
-    
-    for key, fig in fig_dict.items():
-        if fig:  # fig가 비어있지 않은 경우에만 처리
-            byte_data = convert_fig_to_bytes(fig)
-            st.session_state['image_dict'][key] = byte_data
-        
-def load_image_from_session_state(key):
-    if 'image_dict' in st.session_state and key in st.session_state['image_dict']:  # 'images' 대신 'image_dict' 사용
-        byte_data = st.session_state['image_dict'][key]
-        image = Image.open(io.BytesIO(byte_data))
-        fig, ax = plt.subplots()
-        ax.imshow(image)
-        ax.axis('off')  # 축 숨기기
-        # st.image(image)
-        # return fig
-        return image
-    return None
-
-
-
 uri = "mongodb+srv://skaxogusdl:skaclxo661@southdb.h5j75si.mongodb.net/?retryWrites=true&w=majority&appName=SOUTHDB"
 client = MongoClient(uri)
 db = client.mydb
@@ -244,11 +213,9 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
 if (len(players) > 0) and (len(players) < 11):
     st.info("**\*notice**\n\n아직 스쿼드가 11명이 되지않았습니다. \n\n최소 11명이 되어야 다음 단계 진행이 가능합니다.")
 
-slider = False
 if len(players) >= 11:
     expander3 = st.expander('**3️⃣ 포메이션 입력**')
     with expander3:
-        slider = True
         finally_no_errors = False
         st.divider()
         formation1 = st.selectbox('**1쿼터 포메이션**',eng_formation_list, key="formation1")
@@ -256,11 +223,10 @@ if len(players) >= 11:
         formation3 = st.selectbox('**3쿼터 포메이션**',eng_formation_list, key="formation3")
         formation4 = st.selectbox('**4쿼터 포메이션**',eng_formation_list, key="formation4")
         st.session_state['formation_info']['formation'] = {"1q": formation1, "2q": formation2, "3q": formation3, "4q": formation4}
-        formation_list = list(st.session_state['formation_info']['formation'].values())
         edited_entry_df_copy = pd.DataFrame(st.session_state['squad_info']['players'])
-        
         if "선택" not in list(st.session_state['formation_info']['formation'].values()):
             # 선수 목록 초기화
+            # players = [f'Player {i}' for i in range(1, 22)]
             players = edited_entry_df_copy['선수명']
 
             # 선택된 선수 정보를 담을 세션 상태 초기화
@@ -280,10 +246,9 @@ if len(players) >= 11:
             for tdx, tab in enumerate(tabs):
                 tab_key = f"tab{tdx+1}"
                 quarter = st.session_state['formation_info']['formation'][f'{tdx+1}q']
-                st.session_state['formation_info'][f'{tdx+1}q'] = eng_formation_dict[formation_list[tdx]][::-1] + [["GK"]]
                 with tab:
                     cols_list = define_cols_containers(quarter)
-                    placeholder_list = [j for i in for_dot_position[quarter][::-1]+[['GK']] for j in i]
+                    placeholder_list = [j for i in for_dot_position[quarter][::-1] for j in i]
                     
                     for i, cols in zip(range(11), cols_list):
                         unique_key = f"{tab_key}_pos{i+1}"
@@ -301,204 +266,117 @@ if len(players) >= 11:
                         if selected_player != t1.get(unique_key, '') or (selected_player == '' and t1.get(unique_key, '') != ''):
                             st.session_state["tab_selected_players"][tab_key][unique_key] = selected_player
                             st.rerun()
-                            
-                          
             # 선택된 플레이어 출력
-            # for tab_key, players in st.session_state["tab_selected_players"].items():
-            #     st.write(f"{tab_key.replace('tab', 'Quarter ')}:")
-            #     for position, player in players.items():
-            #         st.write(f"{position.split('_')[-1]}: {player}")
-            for tdx, (tab_key, players) in enumerate(st.session_state["tab_selected_players"].items()):
-                # st.write(f"{tab_key.replace('tab', 'Quarter ')}:")
-                sizes = st.session_state['formation_info']['formation'][f'{tdx+1}q'].split('-')[::-1] + ['1']
-                
-                flatten_qn_origin = [j for i in st.session_state['formation_info'][f'{tdx+1}q'][:] for j in i]
-                flatten_qn = [j for i in st.session_state['formation_info'][f'{tdx+1}q'][:] for j in i]
-                
-                split_lists = []
-                        
+            for tab_key, players in st.session_state["tab_selected_players"].items():
+                st.write(f"{tab_key.replace('tab', 'Quarter ')}:")
                 for position, player in players.items():
-                    # st.write(f"{position.split('_')[-1]}: {player}")
-                    insert_num = position.split('pos')[-1]
-                    if insert_num == "0":
-                        insert_idx = 0
-                    else:
-                        insert_idx = int(insert_num)-1
+                    st.write(f"{position.split('_')[-1]}: {player}")
 
-                    flatten_qn[insert_idx] = player
-                    if flatten_qn[insert_idx] == '':
-                        flatten_qn[insert_idx] = flatten_qn_origin[insert_idx]
-                    start = 0
-                    split_lists = []
-                    for size in sizes:
-                        size = int(size)
-                        # 현재 위치에서 size 만큼의 요소를 새로운 서브리스트로 만들고 추가
-                        split_lists.append(flatten_qn[start:start + size])
-                        start += size  # 시작 위치 업데이트
+
+
+with st.sidebar:
+    finally_no_errors = False
+    # st.write(st.session_state['game_info'])
+    # st.write(st.session_state['squad_info'])
+    # st.write(st.session_state['formation_info'])
+    st.write(st.session_state["tab_selected_players"])
+    # st.write(st.session_state['duplicate_info'])
+    
+    # is_all_empty = all(value == [] for value in st.session_state['duplicate_info'].values())
+    # if (len(players) >= 11) and (is_all_empty) and (allocated_quarters_num == 44):
+    formation_list = list(st.session_state['formation_info']['formation'].values())
+    
+    if '선택' not in formation_list:
+        st.subheader("FORMATION")
+        fig, ax = plt.subplots(figsize=(6, 8))
+        
+        graph_fig_dict = dict()
+        scatter_horizon_dict = {4 : [16,12,8,4], 5 : [16,13,10,7,4]} 
+        scatter_vertical_dict = {1 : [10], 2 : [8,12], 3 : [6,10,14], 4 : [4,8,12,16], 5 : [4,7,10,13,16]} 
+        color_dict = {4 : ['red','#769bdb','orange','yellow'], 5 : ['red','#769bdb','#769bdb','orange','yellow']} 
+        
+        ground_gragh_list = [ground_gragh1, ground_gragh2, ground_gragh3, ground_gragh4] = \
+            [st.expander("**▪1쿼터▪**"), st.expander("**▪2쿼터▪**"), st.expander("**▪3쿼터▪**"), st.expander("**▪4쿼터▪**")]
+        for fdx, formation in enumerate(formation_list):
+            with ground_gragh_list[fdx]:
+                graph_fig_dict[f"fig{fdx+1}"] = plt.figure(figsize=(7.5, 7.5))
+                plt.title(f"{fdx+1}쿼터\n", fontdict = {'fontsize': 16,'fontweight': 'bold'})
+                plt.gca().axes.xaxis.set_visible(False)
+                plt.gca().axes.yaxis.set_visible(False)
+                plt.gca().set_facecolor("#adc7b5")
+                plt.xlim(2, 18)
+                plt.ylim(2, 18)
+                
+                for i in range(2,17,2):
+                    grass_color = "#0ceb55" if i%4 == 0 else "#0a5924"
+                    plt.axhspan(i, i+2, color=grass_color, alpha=0.3) 
                         
-                st.session_state['formation_info'][f'{tdx+1}q'] = split_lists
-            
-            
-save_button_bool = False
-if slider:
-    with st.sidebar:
-        finally_no_errors = False
-        # st.write(st.session_state['game_info'])
-        # st.write(st.session_state['squad_info'])
-        # st.write(st.session_state['formation_info'])
-        # st.write(st.session_state["tab_selected_players"])
-        # st.write(st.session_state['duplicate_info'])
-
-        formation_list = list(st.session_state['formation_info']['formation'].values())
+                plt.plot([2, 18], [10, 10], color='white', linewidth=2)
+                
+                plt.plot([8,8], [0,3], color='white', linewidth=2)
+                plt.plot([12,12], [0,3], color='white', linewidth=2)
+                plt.plot([8,12], [3,3], color='white', linewidth=2)
+                
+                plt.plot([8 ,8], [17,18], color='white', linewidth=2)
+                plt.plot([12 ,12], [17,18], color='white', linewidth=2)
+                plt.plot([8 ,12], [17,17], color='white', linewidth=2)
+                
+                circle = Circle((10, 10), 2, edgecolor='white', facecolor='none', linewidth=2)
+                plt.gcf().gca().add_artist(circle)
+                
+                # marking_players = st.session_state['formation_info'][f'{fdx+1}q'][:]
+                marking_players = list(st.session_state['tab_selected_players'][f'tab{fdx+1}'].values)[:]
+                
+                scatter_dot = formation.split("-")[::-1] + ['1']
+                horizon_coordinate = scatter_horizon_dict[len(scatter_dot)]
+                vertical_coordinate = [scatter_vertical_dict[int(i)] for i in scatter_dot]
+                dot_text_pos = for_dot_position[formation][::-1] + [['GK']]
+                color = color_dict[len(scatter_dot)]
+                if formation == '4-2-2-2': vertical_coordinate[1] = [4,16]
+                print(horizon_coordinate)
+                for c, hc, vc_list, dt_list, mp_list in zip(color, horizon_coordinate, vertical_coordinate, dot_text_pos, marking_players):
+                    for vc,dt,mp in zip(vc_list, dt_list, mp_list):
+                        plt.scatter(vc, hc,s=30**2, color=c, alpha=1)
+                        plt.text(vc, hc, dt, fontdict={'size': 14},  verticalalignment='center' , horizontalalignment='center', alpha=1)
+                        if not dt == mp:
+                            plt.text(vc, hc-1.1, mp, fontdict={'size': 18, 'fontweight': 'bold'},  verticalalignment='center' , horizontalalignment='center', alpha=1)
         
-        if '선택' not in formation_list:
-            st.subheader("FORMATION")
-            # fig, ax = plt.subplots(figsize=(6, 8))
-            
-            graph_fig_dict = dict()
-            scatter_horizon_dict = {4 : [16,12,8,4], 5 : [16,13,10,7,4]} 
-            scatter_vertical_dict = {1 : [10], 2 : [8,12], 3 : [6,10,14], 4 : [4,8,12,16], 5 : [4,7,10,13,16]} 
-            color_dict = {4 : ['red','#769bdb','orange','yellow'], 5 : ['red','#769bdb','#769bdb','orange','yellow']} 
-            
-            ground_gragh_list = [ground_gragh1, ground_gragh2, ground_gragh3, ground_gragh4] = \
-                [st.expander("**▪1쿼터▪**"), st.expander("**▪2쿼터▪**"), st.expander("**▪3쿼터▪**"), st.expander("**▪4쿼터▪**")]
-            img_dict = {}
-            for fdx, formation in enumerate(formation_list):
-                with ground_gragh_list[fdx]:
-                    graph_fig_dict[f"fig{fdx+1}"] = plt.figure(figsize=(7.5, 7.5))
-                    plt.title(f"\n{fdx+1}쿼터", fontdict = {'fontsize': 16,'fontweight': 'bold'}, pad = 15)
-                    plt.gca().axes.xaxis.set_visible(False)
-                    plt.gca().axes.yaxis.set_visible(False)
-                    plt.gca().set_facecolor("#adc7b5")
-                    plt.xlim(2, 18)
-                    plt.ylim(2, 18)
+                st.pyplot(graph_fig_dict[f"fig{fdx+1}"])
                     
-                    for i in range(2,17,2):
-                        grass_color = "#0ceb55" if i%4 == 0 else "#0a5924"
-                        plt.axhspan(i, i+2, color=grass_color, alpha=0.3) 
-                            
-                    plt.plot([2, 18], [10, 10], color='white', linewidth=2)
-                    
-                    plt.plot([8,8], [0,3], color='white', linewidth=2)
-                    plt.plot([12,12], [0,3], color='white', linewidth=2)
-                    plt.plot([8,12], [3,3], color='white', linewidth=2)
-                    
-                    plt.plot([8 ,8], [17,18], color='white', linewidth=2)
-                    plt.plot([12 ,12], [17,18], color='white', linewidth=2)
-                    plt.plot([8 ,12], [17,17], color='white', linewidth=2)
-                    
-                    circle = Circle((10, 10), 2, edgecolor='white', facecolor='none', linewidth=2)
-                    plt.gcf().gca().add_artist(circle)
-                    marking_players = st.session_state['formation_info'][f'{fdx+1}q'][:]
-                    
-                    scatter_dot = formation.split("-")[::-1] + ['1']
-                    horizon_coordinate = scatter_horizon_dict[len(scatter_dot)]
-                    vertical_coordinate = [scatter_vertical_dict[int(i)] for i in scatter_dot]
-                    dot_text_pos = for_dot_position[formation][::-1] + [['GK']]
-                    color = color_dict[len(scatter_dot)]
-                    if formation == '4-2-2-2': vertical_coordinate[1] = [4,16]
-                    for c, hc, vc_list, dt_list, mp_list in zip(color, horizon_coordinate, vertical_coordinate, dot_text_pos, marking_players):
-                        for vc,dt,mp in zip(vc_list, dt_list, mp_list):
-                            plt.scatter(vc, hc,s=30**2, color=c, alpha=1)
-                            plt.text(vc, hc, dt, fontdict={'size': 14},  verticalalignment='center' , horizontalalignment='center', alpha=1)
-                            if not dt == mp:
-                                plt.text(vc, hc-1.1, mp, fontdict={'size': 18, 'fontweight': 'bold'},  verticalalignment='center' , horizontalalignment='center', alpha=1)
-                    # plt.subplots_adjust(bottom=0.2)
-                    # plt.savefig(f'./0330/four_plots{fdx+1}.png', dpi=300)
-                    # st.session_state['img'][f"fig{fdx+1}"] = 
-                    st.pyplot(graph_fig_dict[f"fig{fdx+1}"])
-                    
-                    
-                    
-            st.divider()
-            # with st.expander("**🔽 쿼터 확인 데이터**"):
-            final_quarter_allocate_table = edited_entry_df.reset_index(drop=True)
-            real_name_series = final_quarter_allocate_table['선수명']
-            quarter_table = pd.concat([final_quarter_allocate_table.iloc[:, :2],pd.DataFrame([["","","",""]]*len(final_quarter_allocate_table))], axis = 1)
-            quarter_table.columns = ["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"]
-            quarter_table.index = [idx+1 for idx in range(len(final_quarter_allocate_table))]
-            
-            f_dict = copy.deepcopy(st.session_state['formation_info'])
-            
-            for qdx, quarter in enumerate(f_dict['formation']):
-                origin_position_list = [minis for mini_list in for_dot_position[f_dict['formation'][quarter]][::-1] + [['GK']] for minis in mini_list]
-                include_chk_list = [minis for mini_list in f_dict[quarter] for minis in mini_list]
-                for ndx, name in enumerate(include_chk_list):
-                    if name in real_name_series.values:
-                        quarter_table.loc[quarter_table['이름'] == name, f"{qdx+1}Q"] = origin_position_list[ndx]
-                        quarter_table.loc[quarter_table['이름'] == name, '남은 쿼터 수'] -= 1
-            
-            t_quarter = quarter_table['남은 쿼터 수'].sum()
-            t_1q, t_2q, t_3q, t_4q = (quarter_table['1Q'] != "").sum(), (quarter_table['2Q'] != "").sum(), (quarter_table['3Q'] != "").sum(), (quarter_table['4Q'] != "").sum()
-            
-            total_df = pd.DataFrame([["총합",t_quarter, str(t_1q), str(t_2q), str(t_3q), str(t_4q)]], columns=["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"])
-            final_quarter_table = pd.concat([total_df, quarter_table])
-            final_quarter_table['남은 쿼터 수'] = final_quarter_table['남은 쿼터 수'].astype(str)
-            slash_quarters = pd.concat([pd.Series(['44']), final_quarter_allocate_table['배정쿼터수'].astype(str)]).reset_index(drop=True)
-            final_quarter_table.loc[:, '남은 쿼터 수'] = final_quarter_table.loc[:, '남은 쿼터 수'].astype('str') + '/'+  slash_quarters
-            
-            final_df = st.dataframe(final_quarter_table, use_container_width=True, 
-                        column_order= ("index", "이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"), 
-                        hide_index = True,
-                        height=int(35.2*(len(final_quarter_table)+1)))
-
-
-
-            if final_quarter_table.iloc[0, 2:].astype(int).sum() == 3:
-                save_button_bool = True
-
-
-
-if save_button_bool:
-    # st.pyplot(graph_fig_dict['fig1'])
-    
-    # fig = plt.figure()
-    # ax1 = fig.add_subplot(221)    
-    # ax1.plot(graph_fig_dict['fig1'])
-    
-    # print(img_dict)
-    # plt.plot(graph_fig_dict['fig1'])
-    save_images_to_session_state(graph_fig_dict)
-    image1 = load_image_from_session_state("fig1")
-    image2 = load_image_from_session_state("fig2")
-    image3 = load_image_from_session_state("fig3")
-    image4 = load_image_from_session_state("fig4")
+#         # finally_no_errors = True
         
-    # 경계선 너비 설정
-    border_width = 50  # 픽셀 단위
-
-    # 새 캔버스의 크기를 결정 (각 이미지 사이에 경계선 너비를 추가)
-    canvas_width = max(image1.width, image2.width) + max(image3.width, image4.width) + 3 * border_width
-    canvas_height = max(image1.height, image3.height) + max(image2.height, image4.height) + 3 * border_width
-
-    # 새로운 이미지를 생성 (경계선 색상을 흰색으로 설정)
-    new_im = Image.new('RGB', (canvas_width, canvas_height), 'white')
-
-    # 새 이미지에 각 이미지를 붙여넣기 (경계선 고려)
-    new_im.paste(image1, (border_width, border_width))
-    new_im.paste(image2, (image1.width + 2 * border_width, border_width))
-    new_im.paste(image3, (border_width, image1.height + 2 * border_width))
-    new_im.paste(image4, (image3.width + 2 * border_width, image2.height + 2 * border_width))
-
-    # 결과 이미지를 저장하거나 표시
-    # new_im.save("path/to/your/combined_image_with_borders.jpg")
-    # 또는 new_im.show()를 사용하여 바로 볼 수 있습니다
-
-    # 결과 이미지를 저장하거나 표시합니다
-    new_im.save("./0330/four_plots.png")    
-
-
-    # st.download_button("포메이션 저장")
-    
-    with open("./0330/four_plots.png", "rb") as file:
-        btn = st.download_button(
-                label="Download image",
-                data=file,
-                file_name="South_formation.png",
-                mime="image/png"
-            )
-    
-    
+#             st.divider()
+#             # with st.expander("**🔽 쿼터 확인 데이터**"):
+#             final_quarter_allocate_table = edited_entry_df.reset_index(drop=True)
+#             real_name_series = final_quarter_allocate_table['선수명']
+#             quarter_table = pd.concat([final_quarter_allocate_table.iloc[:, :2],pd.DataFrame([["","","",""]]*len(final_quarter_allocate_table))], axis = 1)
+#             quarter_table.columns = ["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"]
+#             quarter_table.index = [idx+1 for idx in range(len(players))]
+            
+#             f_dict = copy.deepcopy(st.session_state['formation_info'])
+            
+#             for qdx, quarter in enumerate(f_dict['formation']):
+#                 origin_position_list = [minis for mini_list in for_dot_position[f_dict['formation'][quarter]][::-1] + [['GK']] for minis in mini_list]
+#                 include_chk_list = [minis for mini_list in f_dict[quarter] for minis in mini_list]
+#                 for ndx, name in enumerate(include_chk_list):
+#                     if name in real_name_series.values:
+#                         quarter_table.loc[quarter_table['이름'] == name, f"{qdx+1}Q"] = origin_position_list[ndx]
+#                         quarter_table.loc[quarter_table['이름'] == name, '남은 쿼터 수'] -= 1
+            
+#             t_quarter = quarter_table['남은 쿼터 수'].sum()
+#             t_1q, t_2q, t_3q, t_4q = (quarter_table['1Q'] != "").sum(), (quarter_table['2Q'] != "").sum(), (quarter_table['3Q'] != "").sum(), (quarter_table['4Q'] != "").sum()
+            
+#             total_df = pd.DataFrame([["총합",t_quarter, str(t_1q), str(t_2q), str(t_3q), str(t_4q)]], columns=["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"])
+#             final_quarter_table = pd.concat([total_df, quarter_table])
+#             final_quarter_table['남은 쿼터 수'] = final_quarter_table['남은 쿼터 수'].astype(str)
+#             slash_quarters = pd.concat([pd.Series(['44']), final_quarter_allocate_table['배정쿼터수'].astype(str)]).reset_index(drop=True)
+#             final_quarter_table.loc[:, '남은 쿼터 수'] = final_quarter_table.loc[:, '남은 쿼터 수'].astype('str') + '/'+  slash_quarters
+            
+#             st.dataframe(final_quarter_table, use_container_width=True, 
+#                         column_order= ("index", "이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"), 
+#                         hide_index = True,
+#                         height=int(35.2*(len(final_quarter_table)+1)))
+        
 #     else:
 #         if len(players) >= 11:
 #             if (allocated_quarters_num == 44):

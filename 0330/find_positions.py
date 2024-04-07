@@ -144,7 +144,7 @@ def define_cols_containers(formation):
                         m_cols1, m_cols2, m_cols3, m_cols4,
                 d_cols1, d_cols2, d_cols3, d_cols4, d_cols5]
             
-                    
-            
+    g_cols1, g_cols2, g_cols3, g_cols4, g_cols5 = st.columns(5)                
+    cols_list = cols_list + [g_cols3]
         # final_cols_list.append(cols_list)
     return cols_list
