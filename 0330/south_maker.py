@@ -477,67 +477,13 @@ if save_button_bool:
                 file_name="South_formation.png",
                 mime="image/png"
             )
-    
-    
-#     else:
-#         if len(players) >= 11:
-#             if (allocated_quarters_num == 44):
-#                 duplicate_problem_list = [f"{key[0]}쿼터" for key, value in st.session_state['duplicate_info'].items() if value != []]
-#                 st.error(f"**\*notice**\n\n{', '.join(duplicate_problem_list)}에 중복 인원이 존재합니다.")            
-                
-
-# st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = False
-# if finally_no_errors:
-#     find_stop_select = final_quarter_table.iloc[1:,:2]
-#     over_quarter_alloncated = find_stop_select[find_stop_select['남은 쿼터 수'].apply(lambda x: int(x.split("/")[0])) < 0]
-    
-#     stop_player_name_list = find_stop_select[find_stop_select['남은 쿼터 수'].apply(lambda x: x.split("/")[0]) == "0"]['이름'].values
-#     stop_player = "🔸"+stop_player_name_list+"🔸"
-    
-#     if len(stop_player)> 0:
-#         with expander3:
-#             st.success(f"**\*notice**\n\n{'     '.join(stop_player)}의 쿼터 배정이 끝났습니다. \n\n자세한 사항은 좌측 사이드 바에서 확인하세요.")
-#             st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = True
-#             st.session_state['quarter_allocation_info']['stop_player_name_list'] = stop_player_name_list
-#             print(st.session_state['quarter_allocation_info']['stop_player_name_list_bool'])
-#             print(st.session_state['quarter_allocation_info']['stop_player_name_list'])
-#     else:
-#         st.session_state['quarter_allocation_info']['stop_player_name_list_bool'] = False
 
 
-############쿼터 다 찬 사람 해결 못함
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###################################################################################################
-
-
-    
-# if st.button('깃허브에 커밋 & 푸시하기'):
-#     # 현재 시간을 커밋 메시지로 사용합니다.
-#     commit_message = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-#     try:
-#         subprocess.run(["git", "add", "."], check=True, stderr=subprocess.PIPE)
-#         subprocess.run(["git", "commit", "-m", commit_message], check=True, stderr=subprocess.PIPE)
-#         subprocess.run(["git", "push"], check=True, stderr=subprocess.PIPE)
-#         st.success('깃허브에 성공적으로 커밋 & 푸시되었습니다.')
-#     except subprocess.CalledProcessError as e:
-#         st.error(f'명령어 실행 중 오류가 발생했습니다: {e}')
-
+if st.button("Home1"):
+    st.switch_page("game_result.py")
+if st.button("Home2"):
+    st.switch_page("./game_result.py")
+if st.button("Hom3e"):
+    st.switch_page("./0330/game_result.py")
+if st.button("Home4"):
+    st.switch_page("0330/game_result.py")
