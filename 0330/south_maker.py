@@ -161,9 +161,9 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
                 quarter_play = (edited_entry_df['배정쿼터수'] == qfm).sum()
                 col.metric(label=" ", value=f"{quarter_play}명", delta=f"{qfm}쿼터")    
                 
-            if allocated_quarters_num > 44:
-                st.error("쿼터 수를 초과했습니다.")
-                st.stop()
+
+                
+                
             st.divider()
             st.write("")
             
@@ -200,7 +200,13 @@ with st.expander('**2️⃣ 스쿼드 입력**'):
                         mini_df = pd.DataFrame([[sub_pos_list[idx]+sub_pos_list[idx+3],sub_pos_list[idx],sub_pos_list[idx+3]]], columns=['총원','중앙', '윙'])
                         edited_entry_df_mini = st.dataframe(mini_df, use_container_width=True, hide_index=True)
 
-        
+            if allocated_quarters_num < 44:
+                st.success("쿼터 수를 맞춰주세요.")
+                st.stop()
+                
+            if allocated_quarters_num > 44:
+                st.error("쿼터 수를 초과했습니다.")
+                st.stop()
         
         
 if (len(players) > 0) and (len(players) < 11):
@@ -220,90 +226,11 @@ if len(players) >= 11:
         # allocated_quarters_num = 0
         if "선택" not in list(st.session_state['formation_info']['formation'].values()):
             st.divider()
-            # st.write("**쿼터 수 분석**")
-            # st.markdown('<span style="color:blue; font-style:italic; font-size:15px;">* 주포지션을 기준으로 가장 공평하게 나눈 쿼터 수 입니다.</span>', unsafe_allow_html=True)
-            # gk_count = (edited_entry_df_copy['주포지션'] == 'GK').sum()
-            # gk_quarter = 4 if gk_count == 0 else 4/gk_count
-            # except_gk_count = len(edited_entry_df_copy) - (edited_entry_df_copy['주포지션'] == 'GK').sum()
-            # except_gk_quarter = 44 if gk_count == 0 else 40
-            
-            # if len(players) >= 11:
-            #     if gk_count > 0:
-            #         col1, col2, col3, col4 = st.columns(4)
-            #         col1.metric("전체인원", f"총 {len(edited_entry_df_copy)}명", "")
-            #         col2.metric("골키퍼", f"{gk_count}명", f"{int(gk_quarter)}쿼터")
-            #         col3.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
-            #         if int(except_gk_quarter/except_gk_count) != 4:
-            #             col4.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
-            #     else:
-            #         col1, col2, col3 = st.columns(3)
-            #         col1.metric("전체인원", f"총 {len(edited_entry_df_copy)}명", f"골키퍼:{gk_count}명")
-            #         col2.metric("필드", f"{except_gk_count- int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)}쿼터")
-            #         if int(except_gk_quarter/except_gk_count) != 4:
-            #             col3.metric("필드", f"{int(except_gk_quarter%except_gk_count)}명", f"{int(except_gk_quarter/except_gk_count)+1}쿼터")
-        
-            # st.write("")
-            # st.write("**쿼터 수 배정**")
-            # c1, c2 = st.columns(2)
-            # with c1:
-            #     st.write("**쿼터 수 배정**")
-            # with c2:
-            #     random_quarter = st.button("**랜덤 배정하기**"):
-            #################################################################################
-            # 
-            #################################################################################
-            
-            
-            # quarter_allocate_df = pd.concat([edited_entry_df_copy['선수명'], pd.DataFrame([0]*len(edited_entry_df_copy['선수명']))], axis=1)
-            # quarter_allocate_df.columns = ['선수명', '배정 쿼터 수']
-            # quarter_allocate_df.index = [idx+1 for idx in range(len(players))]
-
-            # final_quarter_allocate_table = st.data_editor(quarter_allocate_df, use_container_width = True, 
-            #                column_order = ('index', '선수명', '배정 쿼터 수'),
-            #                height=int(35.2*(len(quarter_allocate_df)+1)),
-            #                disabled=["선수명"],
-            #                hide_index=True,
-            #                column_config={
-            #                 "배정 쿼터 수": st.column_config.NumberColumn(
-            #                     min_value=1,
-            #                     max_value=4,
-            #                     step=1,
-            #                  )
-            #                 }
-            #                )
-            
-            # allocated_quarters_num = final_quarter_allocate_table['배정 쿼터 수'].sum()
-            # allocated_quarters_players = (final_quarter_allocate_table['배정 쿼터 수'] != 0).sum()
-            # quarters_for_metric = list(final_quarter_allocate_table['배정 쿼터 수'].unique())
-            # quarters_for_metric.sort()
-            # if 0 in quarters_for_metric: quarters_for_metric.remove(0)
-            
-            # columns = st.columns(len(quarters_for_metric)+1)
-            # columns[0].metric(label="현재 배정된 쿼터 수", value=f"{allocated_quarters_num}/44", delta=f"{allocated_quarters_players}명")
-            # for col,qfm in zip(columns[1:], quarters_for_metric):
-            #     quarter_play = (final_quarter_allocate_table['배정 쿼터 수'] == qfm).sum()
-            #     col.metric(label=f" ", value=f"{quarter_play}명", delta=f"{qfm}쿼터")
             
             formation_list = list(st.session_state['formation_info']['formation'].values())
             tab1, tab2, tab3, tab4 = st.tabs(["**▪1쿼터▪**", "**▪2쿼터▪**", "**▪3쿼터▪**", "**▪4쿼터▪**"])
             con_dict = {}
             
-            # if allocated_quarters_num > 44:
-            #     st.error("쿼터 수를 초과했습니다.")
-                
-#######################################################################################################################################
-# 0331 쿼터 다 찬 사람 해결 못함                
-            # final_quarter_allocate_table_copy = copy.deepcopy(final_quarter_allocate_table)
-            # if st.session_state['quarter_allocation_info']['stop_player_name_list_bool']:
-            #     b = st.session_state['quarter_allocation_info']['stop_player_name_list']
-                # final_quarter_allocate_table_copy_name_list = final_quarter_allocate_table_copy['선수명']
-                # print(final_quarter_allocate_table_copy_name_list)
-                # for i in b:
-                    # print(final_quarter_allocate_table_copy.loc[final_quarter_allocate_table_copy['선수명'] == i, '선수명'])
-                    # final_quarter_allocate_table_copy.loc[final_quarter_allocate_table_copy['선수명'] == i, '선수명'] = "XXX"
-                    
-            # print(final_quarter_allocate_table_copy)
-#######################################################################################################################################
             if allocated_quarters_num == 44:
                 for tdx, tab in enumerate([tab1, tab2, tab3, tab4]):
                     with tab:
@@ -485,42 +412,36 @@ with st.sidebar:
         formation_list = list(st.session_state['formation_info']['formation'].values())
         
         if '선택' not in formation_list:
-            with st.expander("**🔽 쿼터 확인 데이터**"):
-                # real_name_series = select_element_list.apply(lambda x: x.split(":")[0])
-                # quarter_table = pd.concat([real_name_series,pd.DataFrame([[0,"","","",""]]*len(select_element_list))], axis = 1)
-                final_quarter_allocate_table = edited_entry_df.reset_index(drop=True)
-                real_name_series = final_quarter_allocate_table['선수명']
-                quarter_table = pd.concat([final_quarter_allocate_table.iloc[:, :2],pd.DataFrame([["","","",""]]*len(final_quarter_allocate_table))], axis = 1)
-                quarter_table.columns = ["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"]
-                quarter_table.index = [idx+1 for idx in range(len(players))]
-                
-                f_dict = copy.deepcopy(st.session_state['formation_info'])
-                
-                for qdx, quarter in enumerate(f_dict['formation']):
-                    origin_position_list = [minis for mini_list in for_dot_position[f_dict['formation'][quarter]][::-1] + [['GK']] for minis in mini_list]
-                    include_chk_list = [minis for mini_list in f_dict[quarter] for minis in mini_list]
-                    for ndx, name in enumerate(include_chk_list):
-                        if name in real_name_series.values:
-                            quarter_table.loc[quarter_table['이름'] == name, f"{qdx+1}Q"] = origin_position_list[ndx]
-                            # quarter_table.loc[:, '남은 쿼터 수'] = (quarter_table.loc[:, ['1Q','2Q','3Q','4Q']] != "").sum(axis = 1)
-                            # quarter_table.loc[quarter_table['이름'] == name, '남은 쿼터 수'] = \
-                            #     quarter_table.loc[quarter_table['이름'] == name, '남은 쿼터 수'] - \
-                            #         (quarter_table.loc[quarter_table['이름'] == name, ['1Q','2Q','3Q','4Q']] != "").sum(axis = 1)
-                            quarter_table.loc[quarter_table['이름'] == name, '남은 쿼터 수'] -= 1
-                
-                t_quarter = quarter_table['남은 쿼터 수'].sum()
-                t_1q, t_2q, t_3q, t_4q = (quarter_table['1Q'] != "").sum(), (quarter_table['2Q'] != "").sum(), (quarter_table['3Q'] != "").sum(), (quarter_table['4Q'] != "").sum()
-                
-                total_df = pd.DataFrame([["총합",t_quarter, str(t_1q), str(t_2q), str(t_3q), str(t_4q)]], columns=["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"])
-                final_quarter_table = pd.concat([total_df, quarter_table])
-                final_quarter_table['남은 쿼터 수'] = final_quarter_table['남은 쿼터 수'].astype(str)
-                slash_quarters = pd.concat([pd.Series(['44']), final_quarter_allocate_table['배정쿼터수'].astype(str)]).reset_index(drop=True)
-                final_quarter_table.loc[:, '남은 쿼터 수'] = final_quarter_table.loc[:, '남은 쿼터 수'].astype('str') + '/'+  slash_quarters
-                
-                st.dataframe(final_quarter_table, use_container_width=True, 
-                            column_order= ("index", "이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"), 
-                            hide_index = True,
-                            height=int(35.2*(len(final_quarter_table)+1)))
+            # with st.expander("**🔽 쿼터 확인 데이터**"):
+            final_quarter_allocate_table = edited_entry_df.reset_index(drop=True)
+            real_name_series = final_quarter_allocate_table['선수명']
+            quarter_table = pd.concat([final_quarter_allocate_table.iloc[:, :2],pd.DataFrame([["","","",""]]*len(final_quarter_allocate_table))], axis = 1)
+            quarter_table.columns = ["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"]
+            quarter_table.index = [idx+1 for idx in range(len(players))]
+            
+            f_dict = copy.deepcopy(st.session_state['formation_info'])
+            
+            for qdx, quarter in enumerate(f_dict['formation']):
+                origin_position_list = [minis for mini_list in for_dot_position[f_dict['formation'][quarter]][::-1] + [['GK']] for minis in mini_list]
+                include_chk_list = [minis for mini_list in f_dict[quarter] for minis in mini_list]
+                for ndx, name in enumerate(include_chk_list):
+                    if name in real_name_series.values:
+                        quarter_table.loc[quarter_table['이름'] == name, f"{qdx+1}Q"] = origin_position_list[ndx]
+                        quarter_table.loc[quarter_table['이름'] == name, '남은 쿼터 수'] -= 1
+            
+            t_quarter = quarter_table['남은 쿼터 수'].sum()
+            t_1q, t_2q, t_3q, t_4q = (quarter_table['1Q'] != "").sum(), (quarter_table['2Q'] != "").sum(), (quarter_table['3Q'] != "").sum(), (quarter_table['4Q'] != "").sum()
+            
+            total_df = pd.DataFrame([["총합",t_quarter, str(t_1q), str(t_2q), str(t_3q), str(t_4q)]], columns=["이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"])
+            final_quarter_table = pd.concat([total_df, quarter_table])
+            final_quarter_table['남은 쿼터 수'] = final_quarter_table['남은 쿼터 수'].astype(str)
+            slash_quarters = pd.concat([pd.Series(['44']), final_quarter_allocate_table['배정쿼터수'].astype(str)]).reset_index(drop=True)
+            final_quarter_table.loc[:, '남은 쿼터 수'] = final_quarter_table.loc[:, '남은 쿼터 수'].astype('str') + '/'+  slash_quarters
+            
+            st.dataframe(final_quarter_table, use_container_width=True, 
+                        column_order= ("index", "이름", "남은 쿼터 수", "1Q", "2Q", "3Q", "4Q"), 
+                        hide_index = True,
+                        height=int(35.2*(len(final_quarter_table)+1)))
 
                 
                 
